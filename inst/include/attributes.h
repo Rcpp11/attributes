@@ -18,5 +18,6 @@
 #include <attributes/AttributesUtil.h>
 
 #include <attributes/types/types.h>
+#include <attributes/parser/parser.h>
 
 #endif
