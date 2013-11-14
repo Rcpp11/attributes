@@ -17,4 +17,6 @@
 
 #include <attributes/AttributesUtil.h>
 
+#include <attributes/types/types.h>
+
 #endif
