@@ -19,5 +19,6 @@
 
 #include <attributes/types/types.h>
 #include <attributes/parser/parser.h>
+#include <attributes/gen/gen.h>
 
 #endif

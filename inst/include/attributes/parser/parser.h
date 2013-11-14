@@ -4,5 +4,4 @@
 #include <attributes/parser/CommentState.h>
 #include <attributes/parser/SourceFileAttributesParser.h>
 
-
 #endif
