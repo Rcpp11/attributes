@@ -14,7 +14,7 @@ namespace attributes{
         virtual void writeEnd(); 
         virtual bool commit(const std::vector<std::string>& includes); 
         
-    private:
+    private:  
         virtual void doWriteFunctions(const SourceFileAttributes& attributes,
                                       bool verbose) {}
         std::string getHeaderGuard() const; 

@@ -4,7 +4,6 @@
  * AttributesParser.cpp
  *******************************************************************/
 
-
 namespace attributes {
     
     namespace {
