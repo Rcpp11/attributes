@@ -1,0 +1,91 @@
+#include <R.h>
+#include <Rinternals.h>
+
+// [[register]]
+SEXP find_next_char(SEXP chr_, SEXP txt_, SEXP ind_) {
+  
+  const char chr = CHAR( STRING_ELT(chr_, 0) )[0];
+  const char* txt = CHAR( STRING_ELT(txt_, 0) );
+  int ind = INTEGER(ind_)[0] - 1; // R to C style indexing
+  
+  int i = ind + 1;
+  int n = strlen(txt);
+  
+  if (ind < 0 || ind > n-1)
+    error("Invalid index: valid indices are [%i, %i] but index was %i",
+      0, n-1, ind);
+    
+  while (i < n-1) {
+    if (chr == txt[i]) return ScalarInteger(i + 1);
+    ++i;
+  }
+  error("Could not find character '%c'\n", chr);
+  return R_NilValue;
+  
+}
+
+// [[register]]
+SEXP find_prev_char(SEXP chr_, SEXP txt_, SEXP ind_) {
+  
+  const char  chr = CHAR( STRING_ELT(chr_, 0) )[0];
+  const char* txt = CHAR( STRING_ELT(txt_, 0) );
+  int ind = INTEGER(ind_)[0] - 1; // R to C style indexing
+  
+  int i = ind - 1;
+  while (i >= 0) {
+    if (txt[i] == chr) return ScalarInteger(i + 1);
+    --i;
+  }
+  error("could not find character '", chr_, "'");
+  return R_NilValue;
+  
+}
+
+// [[register]]
+SEXP find_matching_char__fwd(SEXP chr_, SEXP cmp_, SEXP txt_, SEXP ind_) {
+  
+  const char  chr = CHAR( STRING_ELT(chr_, 0) )[0];
+  const char  cmp = CHAR( STRING_ELT(cmp_, 0) )[0];
+  const char* txt = CHAR( STRING_ELT(txt_, 0) );
+  int ind = INTEGER(ind_)[0] - 1; // R to C style indexing
+  
+  int balance = 1;
+  int n = strlen(txt);
+  int i = ind + 1;
+  while (i < n) {
+    if (txt[i] == chr) ++balance;
+    if (txt[i] == cmp) --balance;
+    if (balance == 0) break;
+    ++i;
+  }
+  if (i >= n) {
+    error("could not find a matching character for '%c' (was searching for '%c')",
+      chr, cmp);
+  }
+  return ScalarInteger(i + 1);
+  
+}
+
+// [[register]]
+SEXP find_matching_char__bwd(SEXP chr_, SEXP cmp_, SEXP txt_, SEXP ind_) {
+  
+  const char  chr = CHAR( STRING_ELT(chr_, 0) )[0];
+  const char  cmp = CHAR( STRING_ELT(cmp_, 0) )[0];
+  const char* txt = CHAR( STRING_ELT(txt_, 0) );
+  int ind = INTEGER(ind_)[0] - 1; // R to C style indexing
+  
+  int balance = 1;
+  int i = ind - 1;
+  while (i >= 0) {
+    if (txt[i] == chr) ++balance;
+    if (txt[i] == cmp) --balance;
+    if (balance == 0) break;
+    --i;
+  }
+  if (i < 0) {
+    error("could not find a matching character for '%c' (was searching for '%c')",
+      chr, cmp);
+  }
+  return ScalarInteger(i + 1);
+  
+}

@@ -9,19 +9,27 @@ parse_file <- function(file) {
   file <- normalizePath(file, mustWork=TRUE)
   
   ## read the file
-  txt <- readLines(file)
+  txt <- read(file)
   
   ## a regex that should match all attribute-worthy code
   ## /\s*//\s*\[\[(.*?)\]\]
-  rex <- "[[:space:]]*//[[:space:]]\\[\\[(.*?)\\]\\]"
+  pattern <- "//[[:space:]]\\[\\[(.*?)\\]\\]"
+  rex <- "(?=//[[:space:]]\\[\\[(.*?)\\]\\])"
   
   ## get the indices at which we saw attributes
-  ind <- grep(rex, txt, perl=TRUE)
+  matches <- gregexpr(rex, txt, perl=TRUE)
+  ind <- c( matches[[1]] )
   n <- length(ind)
   
   lapply(ind, function(i) {
-    line <- txt[i]
-    code <- gsub(rex, "\\1", line, perl=TRUE)
+    before <- tryCatch( find_prev_char("\n", txt, i) + 2,
+      error=function(e) return (1)
+    )
+    after <- tryCatch( find_next_char("\n", txt, i) - 1,
+      error=function(e) return (nchar(txt))
+    )
+    line <- substring(txt, before, after)
+    code <- gsub(pattern, "\\1", line, perl=TRUE)
     return( list(
       string=line,
       code=code,
