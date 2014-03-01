@@ -19,10 +19,13 @@ parse_file <- function(file) {
   ## get the indices at which we saw attributes
   matches <- gregexpr(rex, txt, perl=TRUE)
   ind <- c( matches[[1]] )
+  if (identical(ind, -1L)) {
+    stop("no attributes found in this file")
+  }
   n <- length(ind)
   
   lapply(ind, function(i) {
-    before <- tryCatch( find_prev_char("\n", txt, i) + 2,
+    before <- tryCatch( find_prev_char("\n", txt, i) + 1,
       error=function(e) return (1)
     )
     after <- tryCatch( find_next_char("\n", txt, i) - 1,
@@ -36,7 +39,7 @@ parse_file <- function(file) {
       expr=parse(text=code),
       index=i,
       file=file
-    ))
+    ) )
   })
   
 }
