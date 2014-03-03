@@ -1,6 +1,6 @@
      
 # [[ symbol ]]     
-symbol_attribute <- function(expr){
+symbol_attribute <- function(expr, file, line){
   structure(
     list(
       expr = expr, file = file, line = line, 
@@ -10,7 +10,7 @@ symbol_attribute <- function(expr){
 }
  
 # [[ !symbol ]]
-negated_symbol_attribute <- function(expr){
+negated_symbol_attribute <- function(expr, file, line){
   structure( 
     list(
       expr = expr, file = file, line = line, 
@@ -20,7 +20,7 @@ negated_symbol_attribute <- function(expr){
 }
 
 # [[ symbol = expr ]]
-assignment_attribute <- function(expr){ 
+assignment_attribute <- function(expr, file, line){ 
   structure( 
     list(
       expr = expr, file = file, line = line, 
@@ -31,7 +31,7 @@ assignment_attribute <- function(expr){
 }
    
 # [[ pkg::symbol ]]
-scoped_symbol_attribute <- function(expr){
+scoped_symbol_attribute <- function(expr, file, line){
   structure(
     list(
       expr = expr, file = file, line = line, 
@@ -42,7 +42,7 @@ scoped_symbol_attribute <- function(expr){
 }
   
 # [[ pkg::foo(expr) ]]
-scoped_call_attribute <- function(expr){
+scoped_call_attribute <- function(expr, file, line){
   structure(
     list( 
       expr = expr, file = file, line = line, 
@@ -53,7 +53,7 @@ scoped_call_attribute <- function(expr){
 }
 
 # [[ foo(expr) ]]
-call_attribute <- function(expr){
+call_attribute <- function(expr, file, line){
   structure( 
     list( 
       expr = expr, file = file, line = line, 
@@ -84,27 +84,27 @@ parse_attributes <- function(file){
       
       single_line_attributes[[i]] <- if( is.symbol(expr) ){
         # attribute of the form [[symbol]]
-        symbol_attribute(expr)
+        symbol_attribute(expr, file, line)
         
       } else if( is.call(expr) && expr[[1L]] == not && is.name(expr[[2L]]) ){
         # attribute of the form [[ !symbol ]]
-        negated_symbol_attribute(expr)
+        negated_symbol_attribute(expr, file, line)
           
       } else if( is.call(expr) && expr[[1L]] == equal && is.name(expr[[2]] ) ){
         # attribute of the form [[symbol = something]]
-        assignment_attribute(expr) 
+        assignment_attribute(expr, file, line) 
         
       } else if( is.call(expr) && expr[[1L]] == double_colon && is.name(expr[[3L]]) ){
         # attribute of the form [[ pkg::symbol ]]
-        scoped_symbol_attribute(expr)
+        scoped_symbol_attribute(expr, file, line)
         
       } else if( is.call(expr) && is.call(expr[[1L]]) && expr[[1L]][[1L]] == double_colon  ){
         # attribute of the form [[ pkg::symbol(...) ]]
-        scoped_call_attribute(expr)
+        scoped_call_attribute(expr, file, line)
         
       } else if( is.call(expr) && is.name(expr[[1L]]) ){
         # attribute of the form [[ foo(...) ]]
-        call_attribute(expr) 
+        call_attribute(expr, file, line) 
         
       } else {
         stop( sprintf( "unrecognized attribute form : [[ %s ]]", deparse(substitute(expr)) ) )  
