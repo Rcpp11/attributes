@@ -1,5 +1,5 @@
 ## Parse the Attributes within a C/C++ Source File
-parse_file <- function(file) {
+parse_attrs <- function(file) {
   
   ## normalize the file name and check it exists
   if (!file.exists(file)) {
@@ -13,14 +13,15 @@ parse_file <- function(file) {
   
   ## a regex that should match all attribute-worthy code
   ## /\s*//\s*\[\[(.*?)\]\]
-  pattern <- "//[[:space:]]\\[\\[(.*?)\\]\\]"
-  rex <- "(?=//[[:space:]]\\[\\[(.*?)\\]\\])"
+  pattern <- "//[[:space:]]*\\[\\[[[:space:]]*(.*?)[[:space:]]*\\]\\]"
+  rex <- "//[[:space:]]*\\[\\[[[:space:]]*(.*?)[[:space:]]*\\]\\]"
   
   ## get the indices at which we saw attributes
+  library(microbenchmark)
   matches <- gregexpr(rex, txt, perl=TRUE)
   ind <- c( matches[[1]] )
   if (identical(ind, -1L)) {
-    stop("no attributes found in this file")
+    return( list() )
   }
   n <- length(ind)
   
@@ -31,6 +32,7 @@ parse_file <- function(file) {
     after <- tryCatch( find_next_char("\n", txt, i) - 1,
       error=function(e) return (nchar(txt))
     )
+    row <- count_newlines(txt, before) + 1L
     line <- substring(txt, before, after)
     code <- gsub(pattern, "\\1", line, perl=TRUE)
     return( list(
@@ -38,6 +40,7 @@ parse_file <- function(file) {
       code=code,
       expr=parse(text=code),
       index=i,
+      row=row,
       file=file
     ) )
   })

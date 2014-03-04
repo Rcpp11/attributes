@@ -125,7 +125,7 @@ parse_attributes <- function(file){
   if( n <- length(start_matches) ){
     r_code_chunks <- rep( list(NULL), n )
     for( i in seq_len(n) ){
-      start <- start_matches[i] +1 
+      start <- start_matches[i] + 1
       end <- end_matches[ end_matches > start ][1L] - 1L
       txt <- code[ seq(start, end) ]
       expr <- parse( text = txt )

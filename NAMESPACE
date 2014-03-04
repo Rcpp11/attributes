@@ -1,2 +1,2 @@
-useDynLib(attributes, .registration = TRUE)
-
+export(compileAttributes)
+useDynLib(attributes, .registration=TRUE)

@@ -24,6 +24,15 @@ SEXP find_next_char(SEXP chr_, SEXP txt_, SEXP ind_) {
   
 }
 
+int cfind_prev_char(const char chr, const char* txt, int ind) {
+  int i = ind - 1;
+  while (i >= 0) {
+    if (txt[i] == chr) return i;
+    --i;
+  }
+  return i;
+}
+
 // [[register]]
 SEXP find_prev_char(SEXP chr_, SEXP txt_, SEXP ind_) {
   
@@ -31,14 +40,11 @@ SEXP find_prev_char(SEXP chr_, SEXP txt_, SEXP ind_) {
   const char* txt = CHAR( STRING_ELT(txt_, 0) );
   int ind = INTEGER(ind_)[0] - 1; // R to C style indexing
   
-  int i = ind - 1;
-  while (i >= 0) {
-    if (txt[i] == chr) return ScalarInteger(i + 1);
-    --i;
+  int idx = cfind_prev_char(chr, txt, ind);
+  if (idx == -1) {
+    error("Could not find character '%c'", chr);
   }
-  error("could not find character '", chr_, "'");
-  return R_NilValue;
-  
+  return ScalarInteger(idx + 1);
 }
 
 // [[register]]

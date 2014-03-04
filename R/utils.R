@@ -7,6 +7,18 @@ complements <- c(
   "}"="{"
 )
 
+tab <- function(n, ...) {
+  paste0( paste0( rep("    ", n), collapse="" ), ... )
+}
+
+parse_args <- function(args) {
+  .Call(C_parse_args, as.character(args))
+}
+
+count_newlines <- function(text, index=nchar(text)) {
+  .Call(C_count_newlines, as.character(text), as.integer(index))
+}
+
 read <- function(path) {
   if (!file.exists(path)) {
     stop("no file at path '", path, "'")
@@ -21,11 +33,9 @@ split_string <- function(string) {
 }
 
 strip_comments <- function(txt) {
-  
-  txt <- gsub("\\/\\*(.*?)\\*\\/", "", txt, perl=TRUE)
-  txt <- gsub("\\/\\/(.*?)\\n", "", txt, perl=TRUE)
+  txt <- gsub("(?s)\\/\\*(.*?)*\\*\\/", "", txt, perl=TRUE)
+  txt <- gsub("(?s)\\/\\/(.*?)*(?<!\\\\)\\n", "", txt, perl=TRUE)
   return(txt)
-  
 }
 
 find_next_char <- function(chr, txt, ind) {
@@ -52,7 +62,6 @@ find_matching_char <- function(txt, ind) {
   }
   
   if (chr %in% c("[", "(", "{")) {
-    cat("Foward")
     .Call( C_find_matching_char__fwd, 
       as.character(chr), 
       as.character(cmp), 
@@ -60,7 +69,6 @@ find_matching_char <- function(txt, ind) {
       as.integer(ind) 
     )
   } else {
-    cat("Backward")
     .Call( C_find_matching_char__bwd,
       as.character(chr), 
       as.character(cmp), 
