@@ -35,7 +35,13 @@
 compileAttributes <- function(pkgdir = ".", verbose = FALSE) {
   
   pkgdir <- normalizePath(pkgdir, winslash = "/")
-  pkgname <- read.dcf( file.path(pkgdir, "DESCRIPTION") )[, "Package"]
+  DESCRIPTION <- as.list(read.dcf( file.path(pkgdir, "DESCRIPTION") )[1, ])
+  pkgname <- DESCRIPTION$Package
+  
+  LinkingTo <- gsub("^[[:space:]]*", "",
+    unlist( strsplit( gsub("\\r|\\n", " ", DESCRIPTION$LinkingTo), ",[[:space:]]+" ) )
+  )
+  
   srcDir <- file.path(pkgdir, "src")
   
   ## Get rid of the old RcppExports files if they exist
@@ -69,8 +75,16 @@ compileAttributes <- function(pkgdir = ".", verbose = FALSE) {
     defns <- lapply(exports, generate_export)
     
     ## Write out the RcppExports.cpp file
+    
+    ## If we're linking to RcppArmadillo, include that instead of Rcpp
+    if ("RcppArmadillo" %in% LinkingTo) {
+      RcppIncludes <- "#include <RcppArmadillo.h>"
+    } else {
+      RcppIncludes < "#include <Rcpp.h>"
+    }
+    
     RcppExports.cpp <- paste( sep="\n",
-      "#include <Rcpp.h>",
+      RcppIncludes,
       "using namespace Rcpp;",
       "",
       do.call( function(...)

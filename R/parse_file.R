@@ -1,3 +1,10 @@
+get_attrs <- function(x) {
+  ## change Rcpp:: to attributes::
+  x <- gsub("Rcpp::", "attributes::", x, perl=TRUE)
+  call <- parse(text=paste0("dummy(", x, ")"))[[1]]
+  as.list( call[2:length(call)] )
+}
+
 ## Parse the Attributes within a C/C++ Source File
 parse_attrs <- function(file) {
   
@@ -12,12 +19,10 @@ parse_attrs <- function(file) {
   txt <- read(file)
   
   ## a regex that should match all attribute-worthy code
-  ## /\s*//\s*\[\[(.*?)\]\]
-  pattern <- "//[[:space:]]*\\[\\[[[:space:]]*(.*?)[[:space:]]*\\]\\]"
-  rex <- "//[[:space:]]*\\[\\[[[:space:]]*(.*?)[[:space:]]*\\]\\]"
+  pattern <- rex <- 
+    "//[[:space:]]*\\[\\[[[:space:]]*(.*?)[[:space:]]*\\]\\]"
   
   ## get the indices at which we saw attributes
-  library(microbenchmark)
   matches <- gregexpr(rex, txt, perl=TRUE)
   ind <- c( matches[[1]] )
   if (identical(ind, -1L)) {
@@ -35,12 +40,13 @@ parse_attrs <- function(file) {
     row <- count_newlines(txt, before) + 1L
     line <- substring(txt, before, after)
     code <- gsub(pattern, "\\1", line, perl=TRUE)
+    attrs <- get_attrs(code)
     return( list(
       string=line,
       code=code,
-      expr=parse(text=code),
       index=i,
       row=row,
+      attrs=attrs,
       file=file
     ) )
   })

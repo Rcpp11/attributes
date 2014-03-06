@@ -11,8 +11,14 @@ tab <- function(n, ...) {
   paste0( paste0( rep("    ", n), collapse="" ), ... )
 }
 
-parse_args <- function(args) {
-  .Call(C_parse_args, as.character(args))
+normalize_newlines <- function(x) {
+  x <- gsub("\\r\\n|\\n\\r", "\n", x, perl=TRUE)
+  x <- gsub("\\r", "\n", x)
+  return(x)
+}
+
+parse_cpp_args <- function(args) {
+  .Call(C_parse_cpp_args, as.character(args))
 }
 
 count_newlines <- function(text, index=nchar(text)) {
@@ -25,7 +31,7 @@ read <- function(path) {
   }
   path <- normalizePath(path, mustWork=TRUE)
   if (length(path) != 1) stop("'path' should be a single string")
-  .Call(C_readfile, path)
+  normalize_newlines( .Call(C_readfile, path) )
 }
 
 split_string <- function(string) {
