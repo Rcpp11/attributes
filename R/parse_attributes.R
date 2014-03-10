@@ -1,12 +1,22 @@
-     
 # [[ symbol ]]     
-symbol_attribute <- function(expr, file, line){
-  structure(
-    list(
-      expr = expr, file = file, line = line, 
-      name = as.character(expr)
-    ), class = c("symbol_attribute", "attribute")
-  )  
+symbol_attribute <- function(expr, file, line, code){
+  name <- as.character(expr)
+  if( name == "export" ){
+    structure(
+      list(
+        expr = expr, file = file, line = line, 
+        data = .Call("parse_cpp_function", code, line),
+        name = as.character(expr)
+      ), class = c("export_symbol_attribute", "symbol_attribute", "attribute")
+    )  
+  } else {
+    structure(
+      list(
+        expr = expr, file = file, line = line, 
+        name = as.character(expr)
+      ), class = c("symbol_attribute", "attribute")
+    )  
+  }
 }
  
 # [[ !symbol ]]
@@ -31,14 +41,26 @@ assignment_attribute <- function(expr, file, line){
 }
    
 # [[ pkg::symbol ]]
-scoped_symbol_attribute <- function(expr, file, line){
-  structure(
-    list(
-      expr = expr, file = file, line = line, 
-      package = as.character(expr[[2L]]), 
-      name = as.character(expr[[3L]])
-    ), class = c("scoped_symbol_attribute", "symbol_attribute", "attribute")
-  )
+scoped_symbol_attribute <- function(expr, file, line, code){
+  name <- as.character(expr[[3L]])
+  pkg  <- as.character(expr[[2L]])
+  if( name == "export" && pkg %in% c("attributes", "Rcpp", "Rcpp11") ) {
+    structure(
+      list(
+        expr = expr, file = file, line = line, 
+        data = .Call("parse_cpp_function", code, line),
+        name = name
+      ), class = c("export_symbol_attribute", "symbol_attribute", "attribute")
+    )
+  } else {
+    structure(
+      list(
+        expr = expr, file = file, line = line, 
+        package = pkg, 
+        name = name
+      ), class = c("scoped_symbol_attribute", "symbol_attribute", "attribute")
+    )
+  }
 }
   
 # [[ pkg::foo(expr) ]]
@@ -84,7 +106,7 @@ parse_attributes <- function(file){
       
       single_line_attributes[[i]] <- if( is.symbol(expr) ){
         # attribute of the form [[symbol]]
-        symbol_attribute(expr, file, line)
+        symbol_attribute(expr, file, line, code)
         
       } else if( is.call(expr) && expr[[1L]] == not && is.name(expr[[2L]]) ){
         # attribute of the form [[ !symbol ]]
@@ -96,7 +118,7 @@ parse_attributes <- function(file){
         
       } else if( is.call(expr) && expr[[1L]] == double_colon && is.name(expr[[3L]]) ){
         # attribute of the form [[ pkg::symbol ]]
-        scoped_symbol_attribute(expr, file, line)
+        scoped_symbol_attribute(expr, file, line, code)
         
       } else if( is.call(expr) && is.call(expr[[1L]]) && expr[[1L]][[1L]] == double_colon  ){
         # attribute of the form [[ pkg::symbol(...) ]]
@@ -114,7 +136,6 @@ parse_attributes <- function(file){
     single_line_attributes
   }
   attributes <- single_line_attributes
-  
   
   # R code chunks /*** R */
   start_rx <- "^/[*]{3}[[:space:]]*[Rr]"
