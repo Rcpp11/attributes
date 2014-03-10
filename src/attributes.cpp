@@ -81,7 +81,13 @@ SEXP parse_arguments( const std::string& args ){
         arguments.push_back(currentArg);
         
     int n = arguments.size() ; 
+    SEXP names = PROTECT(Rf_allocVector(STRSXP, n) ) ;
     SEXP res = PROTECT(Rf_allocVector( VECSXP, n) ) ;
+    SEXP param_name = PROTECT(Rf_allocVector(STRSXP, 2)) ;
+    SET_NAMED(param_name, 2) ;
+    SET_STRING_ELT(param_name, 0, Rf_mkChar("type")); 
+    SET_STRING_ELT(param_name, 1, Rf_mkChar("default")); 
+    
     for( int i=0; i<n; i++){
         std::string arg = arguments[i] ;
         std::string::size_type start = arg.find_first_not_of( kWhitespaceChars ) ;
@@ -89,23 +95,38 @@ SEXP parse_arguments( const std::string& args ){
         
         // find default value (if any). 
         std::string::size_type eqPos = arg.find_first_of( '=', start ) ;
-        SEXP current = PROTECT(Rf_allocVector(STRSXP, 3 )) ;
+        SEXP current = PROTECT(Rf_allocVector(STRSXP, 2)) ;
+        
         if( eqPos != std::string::npos ){
             std::string::size_type default_start = arg.find_first_not_of( kWhitespaceChars, eqPos + 1 ) ;
-            SET_STRING_ELT( current, 2, Rf_mkCharLen( arg.data() + default_start , end - default_start + 1 ) ) ;
+            SET_STRING_ELT( current, 1, Rf_mkCharLen( arg.data() + default_start , end - default_start + 1 ) ) ;
             arg.erase( eqPos ) ;
         } else {
-            SET_STRING_ELT( current, 2, NA_STRING ) ;    
+            SET_STRING_ELT( current, 1, NA_STRING ) ;    
         }
         
-        // find type and name
-        SET_STRING_ELT(current, 0, Rf_mkChar( arg.c_str() ) ) ;
+        // only keep (trimmed) part before the '='
+        arg.erase( 0, start ) ;
+        end = arg.find_last_not_of( kWhitespaceChars );
+        if( end != std::string::npos ){
+            arg.erase( end + 1) ;    
+        }
         
+        // where does the type end
+        end = arg.find_last_of( kWhitespaceChars ) ;
+        
+        // name
+        SET_STRING_ELT(names, i, Rf_mkCharLen(arg.data() + end + 1, arg.size() - end - 1 ) ) ;
+        
+        // type
+        SET_STRING_ELT(current, 0, Rf_mkCharLen(arg.data(), end ) ) ;
+        
+        Rf_setAttrib(current, R_NamesSymbol, param_name ) ;
         SET_VECTOR_ELT(res, i, current) ;
         UNPROTECT(1) ; // current
     }
-    
-    UNPROTECT(1) ; // res
+    Rf_setAttrib( res, R_NamesSymbol, names );
+    UNPROTECT(2) ; // res, names
     return res ;
 }
 
