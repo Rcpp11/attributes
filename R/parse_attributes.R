@@ -25,6 +25,9 @@ parse_attributes <- function(file){
       if( is.symbol(expr) ){
         # attribute of the form [[symbol]] -> equivalent to symbol()
         name <- as.character(expr)
+        if( name %in% c("export", "depends" ) ){
+          name <- sprintf("Rcpp::%s", name )  
+        }
         single_line_attributes[[i]] <- structure(
           list( 
             file = file, line = line, content = code, name = name, param = NULL
@@ -59,6 +62,10 @@ parse_attributes <- function(file){
         
       } else if( is.call(expr) && is.name(expr[[1L]]) ){
         name <- as.character(expr[[1L]])
+        if( name %in% c("export", "depends" ) ){
+          name <- sprintf("Rcpp::%s", name )  
+        }
+        
         single_line_attributes[[i]] <- structure(
           list( 
             file = file, line = line, content = code, name = name, param = as.list(cdr(expr))
