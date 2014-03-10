@@ -126,7 +126,7 @@ SEXP parse_arguments( const std::string& args ){
         UNPROTECT(1) ; // current
     }
     Rf_setAttrib( res, R_NamesSymbol, names );
-    UNPROTECT(2) ; // res, names
+    UNPROTECT(3) ; // res, names, param_name
     return res ;
 }
 
