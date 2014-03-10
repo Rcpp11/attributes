@@ -1,87 +1,5 @@
-# [[ symbol ]]     
-symbol_attribute <- function(expr, file, line, code){
-  name <- as.character(expr)
-  if( name == "export" ){
-    structure(
-      list(
-        expr = expr, file = file, line = line, 
-        data = .Call("parse_cpp_function", code, line),
-        name = as.character(expr)
-      ), class = c("export_symbol_attribute", "symbol_attribute", "attribute")
-    )  
-  } else {
-    structure(
-      list(
-        expr = expr, file = file, line = line, 
-        name = as.character(expr)
-      ), class = c("symbol_attribute", "attribute")
-    )  
-  }
-}
- 
-# [[ !symbol ]]
-negated_symbol_attribute <- function(expr, file, line){
-  structure( 
-    list(
-      expr = expr, file = file, line = line, 
-      name   = as.character(expr[[2L]])
-    ), class = c("negated_symbol_attribute", "symbol_attribute", "attribute")
-  )  
-}
-
-# [[ symbol = expr ]]
-assignment_attribute <- function(expr, file, line){ 
-  structure( 
-    list(
-      expr = expr, file = file, line = line, 
-      target = as.character(expr[[2]]), 
-      code = expr[[3]]
-    ), class = c("assignment_attribute", "attribute")
-  )
-}
-   
-# [[ pkg::symbol ]]
-scoped_symbol_attribute <- function(expr, file, line, code){
-  name <- as.character(expr[[3L]])
-  pkg  <- as.character(expr[[2L]])
-  if( name == "export" && pkg %in% c("attributes", "Rcpp", "Rcpp11") ) {
-    structure(
-      list(
-        expr = expr, file = file, line = line, 
-        data = .Call("parse_cpp_function", code, line),
-        name = name
-      ), class = c("export_symbol_attribute", "symbol_attribute", "attribute")
-    )
-  } else {
-    structure(
-      list(
-        expr = expr, file = file, line = line, 
-        package = pkg, 
-        name = name
-      ), class = c("scoped_symbol_attribute", "symbol_attribute", "attribute")
-    )
-  }
-}
-  
-# [[ pkg::foo(expr) ]]
-scoped_call_attribute <- function(expr, file, line){
-  structure(
-    list( 
-      expr = expr, file = file, line = line, 
-      package = expr[[1L]][[2L]],
-      name = expr[[1L]][[3L]]
-    ), class = c("scoped_call_attribute", "call_attribute", "attribute" )
-  )
-}
-
-# [[ foo(expr) ]]
-call_attribute <- function(expr, file, line){
-  structure( 
-    list( 
-      expr = expr, file = file, line = line, 
-      name = as.character(expr[[1L]])
-    ), class = c("call_attribute", "attribute" )
-  )  
+cdr <- function(x){
+  .Call('get_cdr', x, PACKAGE = "attributes")  
 }
 
 parse_attributes <- function(file){
@@ -104,29 +22,49 @@ parse_attributes <- function(file){
       expr <- parse( text = expressions[i], n = 1L )[[1L]]
       line <- matches[i]
       
-      single_line_attributes[[i]] <- if( is.symbol(expr) ){
-        # attribute of the form [[symbol]]
-        symbol_attribute(expr, file, line, code)
-        
-      } else if( is.call(expr) && expr[[1L]] == not && is.name(expr[[2L]]) ){
-        # attribute of the form [[ !symbol ]]
-        negated_symbol_attribute(expr, file, line)
-          
+      if( is.symbol(expr) ){
+        # attribute of the form [[symbol]] -> equivalent to symbol()
+        name <- as.character(expr)
+        single_line_attributes[[i]] <- structure(
+          list( 
+            file = file, line = line, content = code, name = name, param = NULL
+          ), 
+          class = "call_attribute"
+        )
       } else if( is.call(expr) && expr[[1L]] == equal && is.name(expr[[2]] ) ){
-        # attribute of the form [[symbol = something]]
-        assignment_attribute(expr, file, line) 
-        
+        target <- as.character(expr[[2]])
+        single_line_attributes[[i]] <- structure(
+          list( 
+            file = file, line = line, content = code, target = target, code = expr[[3L]]
+          ), 
+          class = "assignment_attribute"
+        )
       } else if( is.call(expr) && expr[[1L]] == double_colon && is.name(expr[[3L]]) ){
-        # attribute of the form [[ pkg::symbol ]]
-        scoped_symbol_attribute(expr, file, line, code)
+        name <- sprintf( "%s::%s", as.character(expr[[2L]]), as.character(expr[[3L]]) )
+        single_line_attributes[[i]] <- structure(
+          list( 
+            file = file, line = line, content = code, name = name, param = NULL
+          ), 
+          class = "call_attribute"
+        )
         
       } else if( is.call(expr) && is.call(expr[[1L]]) && expr[[1L]][[1L]] == double_colon  ){
-        # attribute of the form [[ pkg::symbol(...) ]]
-        scoped_call_attribute(expr, file, line)
+        name <- sprintf( "%s::%s", expr[[1L]][[2L]], expr[[1L]][[3L]] )
+        single_line_attributes[[i]] <- structure(
+          list( 
+            file = file, line = line, content = code, name = name, param = as.list(cdr(expr))
+          ), 
+          class = "call_attribute"
+        )
         
       } else if( is.call(expr) && is.name(expr[[1L]]) ){
-        # attribute of the form [[ foo(...) ]]
-        call_attribute(expr, file, line) 
+        name <- as.character(expr[[1L]])
+        single_line_attributes[[i]] <- structure(
+          list( 
+            file = file, line = line, content = code, name = name, param = as.list(cdr(expr))
+          ), 
+          class = "call_attribute"
+        )
         
       } else {
         stop( sprintf( "unrecognized attribute form : [[ %s ]]", deparse(substitute(expr)) ) )  

@@ -167,3 +167,7 @@ extern "C" SEXP parse_cpp_function( SEXP txt, SEXP line ){
     return res  ;
 }
 
+extern "C" SEXP get_cdr(SEXP x){
+    return CDR(x) ;    
+}
+
