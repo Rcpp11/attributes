@@ -92,10 +92,14 @@ SEXP parse_arguments( const std::string& args ){
         SEXP current = PROTECT(Rf_allocVector(STRSXP, 3 )) ;
         if( eqPos != std::string::npos ){
             std::string::size_type default_start = arg.find_first_not_of( kWhitespaceChars, eqPos + 1 ) ;
-            SET_STRING_ELT( current, 2, Rf_mkCharLen( arg.data() + default_start , end - default_start + 1 ) ) ;    
+            SET_STRING_ELT( current, 2, Rf_mkCharLen( arg.data() + default_start , end - default_start + 1 ) ) ;
+            arg.erase( eqPos ) ;
         } else {
             SET_STRING_ELT( current, 2, NA_STRING ) ;    
         }
+        
+        // find type and name
+        SET_STRING_ELT(current, 0, Rf_mkChar( arg.c_str() ) ) ;
         
         SET_VECTOR_ELT(res, i, current) ;
         UNPROTECT(1) ; // current
