@@ -80,18 +80,28 @@ SEXP parse_arguments( const std::string& args ){
     if (!currentArg.empty())
         arguments.push_back(currentArg);
         
-    
     int n = arguments.size() ; 
-    SEXP res = PROTECT(Rf_allocVector( STRSXP, n) ) ;
+    SEXP res = PROTECT(Rf_allocVector( VECSXP, n) ) ;
     for( int i=0; i<n; i++){
         std::string arg = arguments[i] ;
         std::string::size_type start = arg.find_first_not_of( kWhitespaceChars ) ;
         std::string::size_type end   = arg.find_last_not_of( kWhitespaceChars ) ;
         
-        SET_STRING_ELT(res, i, Rf_mkCharLen( arg.data() + start, (end-start+1) ) ) ;     
+        // find default value (if any). 
+        std::string::size_type eqPos = arg.find_first_of( '=', start ) ;
+        SEXP current = PROTECT(Rf_allocVector(STRSXP, 3 )) ;
+        if( eqPos != std::string::npos ){
+            std::string::size_type default_start = arg.find_first_not_of( kWhitespaceChars, eqPos + 1 ) ;
+            SET_STRING_ELT( current, 2, Rf_mkCharLen( arg.data() + default_start , end - default_start + 1 ) ) ;    
+        } else {
+            SET_STRING_ELT( current, 2, NA_STRING ) ;    
+        }
+        
+        SET_VECTOR_ELT(res, i, current) ;
+        UNPROTECT(1) ; // current
     }
     
-    UNPROTECT(1) ;
+    UNPROTECT(1) ; // res
     return res ;
 }
 
