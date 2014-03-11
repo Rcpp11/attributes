@@ -34,14 +34,14 @@ parse_attributes <- function(file){
           ), 
           class = "call_attribute"
         )
-      } else if( is.call(expr) && expr[[1L]] == equal && is.name(expr[[2]] ) ){
-        target <- as.character(expr[[2]])
-        single_line_attributes[[i]] <- structure(
-          list( 
-            file = file, line = line, content = code, target = target, code = expr[[3L]]
-          ), 
-          class = "assignment_attribute"
-        )
+      # } else if( is.call(expr) && expr[[1L]] == equal && is.name(expr[[2]] ) ){
+      #   target <- as.character(expr[[2]])
+      #   single_line_attributes[[i]] <- structure(
+      #     list( 
+      #       file = file, line = line, content = code, target = target, code = expr[[3L]]
+      #     ), 
+      #     class = "assignment_attribute"
+      #   )
       } else if( is.call(expr) && expr[[1L]] == double_colon && is.name(expr[[3L]]) ){
         name <- sprintf( "%s::%s", as.character(expr[[2L]]), as.character(expr[[3L]]) )
         single_line_attributes[[i]] <- structure(

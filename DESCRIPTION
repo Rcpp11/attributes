@@ -1,15 +1,12 @@
 Package: attributes
 Title: Standalone implementation of Rcpp attributes
-Version: 0.0.0
+Version: 0.0
 Date: 2013-11-14
 Authors@R: c(
     person("Romain", "Francois", role = c("aut", "cre"), email = "romain@r-enthusiasts.com"),
-    person("JJ", "Allaire", role = "ctb", email = "jj.allaire@gmail.com"),
-    person("Dirk", "Eddelbuettel", role = "aut", email = "edd@debian.org" )
+    person("Kevin", "Ushey", role = "ctb", email = "kevinushey@gmail.com" )
     )
 Depends: R (>= 3.0.2)
 Imports: methods
-URL: https://github.com/RcppCore/attributes
 License: GPL (>= 2)
-BugReports: https://github.com/RcppCore/attributes/issues
 
