@@ -47,8 +47,6 @@ sourceCppContext <- function(file){
     # load
     dyn.load( dynlib )    
     
-    writeLines( readLines( R_temp_file ) )
-    
     # run the R code
     source( R_temp_file )
     
@@ -70,9 +68,9 @@ sourceCppHandlersEnv[["Rcpp::export"]] <- function(attribute, context, ...){
   input_parameters <- sprintf( "Rcpp::traits::input_parameter<%s>::type %s(%sSEXP) ;", sapply(arguments, "[[", 1L), names(arguments), names(arguments) )
   
   return_txt <- if( is_void ){
-      sprintf( "%s(%s) ;", name, paste(names(arguments), collapse = ", " ) )
+      sprintf( "%s(%s) ; __sexp_result = R_NilValue ;", name, paste(names(arguments), collapse = ", " ) )
   } else {
-      sprintf( "%s __result = %s(%s) ; __sexp_result = PROTECT(Rcpp::wrap(__result)) ;", return_type,  name, paste(names(arguments), collapse = ", " ) ) 
+      sprintf( "%s __result = %s(%s) ; PROTECT(__sexp_result = Rcpp::wrap(__result)) ;", return_type,  name, paste(names(arguments), collapse = ", " ) ) 
   }
   unprotect <- if( is_void ){
     ""   
