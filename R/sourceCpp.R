@@ -102,7 +102,7 @@ extern "C" SEXP sourceCpp_%s( %s ){
   
   # generate R code
   R_params <- paste( sapply( arguments, function(arg){
-    if( arg[1L] %in% c("Dots", "Rcpp::Dots") ){
+    if( arg[1L] %in% c("Dots", "Rcpp::Dots", "NamedDots", "Rcpp::NamedDots") ){
       "..."  
     } else {
       arg[3L]  
@@ -111,7 +111,7 @@ extern "C" SEXP sourceCpp_%s( %s ){
   
   if( length(arguments) ) {
     cpp_params <- paste( sapply( arguments, function(arg){
-      if( arg[1L] %in% c("Dots", "Rcpp::Dots") ){
+      if( arg[1L] %in% c("Dots", "Rcpp::Dots", "NamedDots", "Rcpp::NamedDots") ){
         "environment()"  
       } else {
         arg[3L]
