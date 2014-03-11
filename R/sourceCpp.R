@@ -1,6 +1,7 @@
 sourceCppContext <- function(file){
   cpp_temp_file <- tempfile( fileext = ".cpp" )
   R_temp_file   <- tempfile( fileext = ".R" ) 
+  dynlib        <- gsub( "[.]cpp", .Platform$dynlib.ext, cpp_temp_file)
   
   file.copy( file, cpp_temp_file )
   cpp_con <- file( cpp_temp_file, open = "a" )
@@ -25,7 +26,6 @@ sourceCppContext <- function(file){
     } else if( !identical( buildEnv[[name]], value ) ){
       buildEnv[[name]] <- paste( buildEnv[[name]], value )
     }
-    
   }
   ctx[["compile"]] = function(){
     # finish
@@ -33,20 +33,22 @@ sourceCppContext <- function(file){
     close(R_con)
     
     # setup the build env
+    if( length(ls(buildEnv)) )
+      do.call( Sys.setenv, as.list(buildEnv) )
     
     # SHLIB
+    cmd <- paste(R.home(component="bin"), .Platform$file.sep, "R ",
+                     "CMD SHLIB ",
+                     "-o ", shQuote(dynlib), " ",
+                     shQuote(cpp_temp_file), sep="")
+    
+    system( cmd, intern = TRUE )
     
     # load
+    dyn.load( dynlib )    
     
     # run the R code
-    
-  }
-  ctx[["debug"]] = function(){
-    close(cpp_con)
-    close(R_con)
-    
-    writeLines(readLines(cpp_temp_file))
-    writeLines(readLines(R_temp_file)  )
+    source( R_temp_file )
     
   }
   ctx
@@ -54,6 +56,7 @@ sourceCppContext <- function(file){
 
 sourceCppHandlersEnv <- new.env()
 sourceCppHandlersEnv[["Rcpp::export"]] <- function(attribute, context, ...){
+  # parse C++ function internally
   cpp_fun <- .Call( "parse_cpp_function", attribute$content, attribute$line )
   name <- cpp_fun$name
   arguments <- cpp_fun$arguments
@@ -61,6 +64,7 @@ sourceCppHandlersEnv[["Rcpp::export"]] <- function(attribute, context, ...){
   return_type <- cpp_fun$return_type
   is_void <- identical( return_type, "void" ) 
   
+  # generate C++ code
   input_parameters <- sprintf( "Rcpp::traits::input_parameter<%s>::type %s(%sSEXP) ;", sapply(arguments, "[[", 1L), names(arguments), names(arguments) )
   
   return_txt <- if( is_void ){
@@ -71,7 +75,7 @@ sourceCppHandlersEnv[["Rcpp::export"]] <- function(attribute, context, ...){
   unprotect <- if( is_void ){
     ""   
   } else {
-    "UNPROTECT(1)" ;  
+    "UNPROTECT(1) ;"  
   }
   
   body <- sprintf( '
@@ -95,6 +99,34 @@ extern "C" SEXP sourceCpp_%s( %s ){
 }', name, attribute$file, attribute$line, attribute$name, name, params, body)
   
   context$add_cpp(code) 
+  
+  # generate R code
+  R_params <- paste( sapply( arguments, function(arg){
+    if( arg[1L] %in% c("Dots", "Rcpp::Dots") ){
+      "..."  
+    } else {
+      arg[3L]  
+    }
+  }), collapse = ", " )
+  
+  cpp_params <- paste( sapply( arguments, function(arg){
+    if( arg[1L] %in% c("Dots", "Rcpp::Dots") ){
+      "environment()"  
+    } else {
+      arg[3L]
+    }
+  }), collapse = ", " )
+  
+  return_txt <- if( is_void ) "invisible(NULL)" else "res"
+  
+  Rcode <- sprintf( '
+  %s <- function(%s){
+    res <- .Call( "sourceCpp_%s", %s)
+    %s
+  }
+  ', name, R_params, name, cpp_params, return_txt)
+  context$add_R(Rcode)
+  
 }   
 
 sourceCppHandlers <- function(){
@@ -117,7 +149,15 @@ sourceCpp <- function( file, Rcpp = "Rcpp11", handlers = sourceCppHandlers() ){
     do.call( handler, args )
   }
   
-  context$debug()
+  context$build_param( "CLINK_CPPFLAGS", .buildClinkCppFlags(Rcpp) )
+  
+  context$compile()
+  
+  for( chunk in attributes$r_code_chunks ){
+    temp <- tempfile( fileext = ".R" )
+    writeLines( chunk, temp )
+    source( temp, echo = TRUE )
+  }
   
 }
 

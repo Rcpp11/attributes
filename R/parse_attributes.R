@@ -94,9 +94,7 @@ parse_attributes <- function(file){
       start <- start_matches[i] +1 
       end <- end_matches[ end_matches > start ][1L] - 1L
       txt <- code[ seq(start, end) ]
-      expr <- parse( text = txt )
-      
-      r_code_chunks[[i]] <- expr
+      r_code_chunks[[i]] <- txt
     }
   }
   
