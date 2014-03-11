@@ -149,6 +149,7 @@ sourceCpp <- function( file, Rcpp = "Rcpp11", handlers = sourceCppHandlers() ){
     do.call( handler, args )
   }
   
+  # add the LinkingTo: Rcpp*
   context$build_param( "CLINK_CPPFLAGS", .buildClinkCppFlags(Rcpp) )
   
   context$compile()
