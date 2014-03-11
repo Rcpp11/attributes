@@ -10,7 +10,24 @@
 #include <sstream>
 
 static const char * const kWhitespaceChars = " \f\n\r\t\v" ;
+
+// Trim a string
+void trimWhitespace(std::string& s) {   
     
+    // skip empty case
+    if (s.empty())
+        return;
+    
+    // trim right                  
+    std::string::size_type pos = s.find_last_not_of(kWhitespaceChars);
+    if (pos != std::string::npos)
+        s.erase(pos + 1);    
+        
+    // trim left
+    pos = s.find_first_not_of(kWhitespaceChars);
+    s.erase(0, pos);
+}
+
 std::string get_function_signature( SEXP txt, int pos ){
     std::string current_line = CHAR(STRING_ELT(txt, pos)) ;
     
@@ -46,7 +63,6 @@ SEXP parse_arguments( const std::string& args ){
     std::string currentArg;
         
     char prevChar = 0 ;
-    
     for( std::string::const_iterator it = args.begin(); it != args.end(); ++it ){
         char ch = *it ;
         if( ch == '"' && prevChar != '\\' ) {
@@ -77,10 +93,11 @@ SEXP parse_arguments( const std::string& args ){
         prevChar = ch;
     }  
     
-    if (!currentArg.empty())
+    if (!currentArg.empty() && currentArg != "void" ){
         arguments.push_back(currentArg);
-        
-    int n = arguments.size() ; 
+    }
+    
+    int n = arguments.size() ;
     SEXP names = PROTECT(Rf_allocVector(STRSXP, n) ) ;
     SEXP res = PROTECT(Rf_allocVector( VECSXP, n) ) ;
     SEXP param_name = PROTECT(Rf_allocVector(STRSXP, 2)) ;
@@ -143,13 +160,13 @@ extern "C" SEXP parse_cpp_function( SEXP txt, SEXP line ){
         
     // find name of the function and return type
     std::string preamble = signature.substr(0, beginParenLoc) ; 
-    
     std::string::size_type sep = preamble.find_last_of( kWhitespaceChars ) ;
     std::string name = preamble.substr( sep + 1); 
     std::string return_type = preamble.substr( 0, sep) ;
     
     std::string args = signature.substr( beginParenLoc + 1, endParenLoc-beginParenLoc-1 ) ;
-        
+    trimWhitespace(args) ;    
+    
     SEXP res   = PROTECT( Rf_allocVector( VECSXP, 3 ) );
     SEXP names = PROTECT( Rf_allocVector( STRSXP, 3 ) );
     

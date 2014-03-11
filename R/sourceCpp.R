@@ -60,6 +60,8 @@ sourceCppHandlersEnv[["Rcpp::export"]] <- function(attribute, context, ...){
   cpp_fun <- .Call( "parse_cpp_function", attribute$content, attribute$line )
   name <- cpp_fun$name
   arguments <- cpp_fun$arguments
+  if( identical(arguments, "void" ) ) arguments <- list() 
+  
   params <- paste( sprintf( "SEXP %sSEXP", names(arguments) ), collapse = ", " )
   return_type <- cpp_fun$return_type
   is_void <- identical( return_type, "void" ) 
