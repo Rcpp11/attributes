@@ -1,5 +1,6 @@
 Package: attributes
 Title: Standalone implementation of Rcpp attributes
+Description: Standalone implementation of Rcpp attributes
 Version: 0.0
 Date: 2013-11-14
 Authors@R: c(
