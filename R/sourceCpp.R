@@ -47,6 +47,8 @@ sourceCppContext <- function(file){
     # load
     dyn.load( dynlib )    
     
+    writeLines( readLines( R_temp_file ) )
+    
     # run the R code
     source( R_temp_file )
     
@@ -109,19 +111,24 @@ extern "C" SEXP sourceCpp_%s( %s ){
     }
   }), collapse = ", " )
   
-  cpp_params <- paste( sapply( arguments, function(arg){
-    if( arg[1L] %in% c("Dots", "Rcpp::Dots") ){
-      "environment()"  
-    } else {
-      arg[3L]
-    }
-  }), collapse = ", " )
+  if( length(arguments) ) {
+    cpp_params <- paste( sapply( arguments, function(arg){
+      if( arg[1L] %in% c("Dots", "Rcpp::Dots") ){
+        "environment()"  
+      } else {
+        arg[3L]
+      }
+    }), collapse = ", " )
+    cpp_params <- sprintf( ", %s", cpp_params )
+  } else {
+    cpp_params <- ""  
+  }
   
   return_txt <- if( is_void ) "invisible(NULL)" else "res"
   
   Rcode <- sprintf( '
   %s <- function(%s){
-    res <- .Call( "sourceCpp_%s", %s)
+    res <- .Call( "sourceCpp_%s" %s)
     %s
   }
   ', name, R_params, name, cpp_params, return_txt)
