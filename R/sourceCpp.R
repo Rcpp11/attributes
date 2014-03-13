@@ -140,7 +140,7 @@ sourceCppHandlers <- function(){
   sourceCppHandlersEnv  
 }
 
-
+##' @export
 sourceCpp <- function( file, Rcpp = "Rcpp11", handlers = sourceCppHandlers() ){
   
   attributes <- parse_attributes(file)
