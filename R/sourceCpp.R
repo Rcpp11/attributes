@@ -57,7 +57,7 @@ sourceCppContext <- function(file){
 sourceCppHandlersEnv <- new.env()
 sourceCppHandlersEnv[["Rcpp::export"]] <- function(attribute, context, ...){
   # parse C++ function internally
-  cpp_fun <- .Call( "parse_cpp_function", attribute$content, attribute$line )
+  cpp_fun <- .Call( C_parse_cpp_function, attribute$content, attribute$line )
   name <- cpp_fun$name
   arguments <- cpp_fun$arguments
   if( identical(arguments, "void" ) ) arguments <- list() 

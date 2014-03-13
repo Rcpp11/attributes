@@ -12,6 +12,7 @@
 static const char * const kWhitespaceChars = " \f\n\r\t\v" ;
 
 // Trim a string
+
 void trimWhitespace(std::string& s) {   
     
     // skip empty case
@@ -148,8 +149,10 @@ SEXP parse_arguments( const std::string& args ){
     return res ;
 }
 
-
-extern "C" SEXP parse_cpp_function( SEXP txt, SEXP line ){
+extern "C" {
+  
+  // [[register]]
+  SEXP parse_cpp_function( SEXP txt, SEXP line ){
     
     int pos = INTEGER(line)[0] ;
     std::string signature = get_function_signature( txt, pos ) ;
@@ -183,9 +186,12 @@ extern "C" SEXP parse_cpp_function( SEXP txt, SEXP line ){
     Rf_setAttrib( res, R_NamesSymbol, names ) ; 
     UNPROTECT(2) ;
     return res  ;
-}
+  }
 
-extern "C" SEXP get_cdr(SEXP x){
-    return CDR(x) ;    
+  // [[register]]
+  SEXP get_cdr(SEXP x){
+    return CDR(x) ;
+  }
+  
 }
 
