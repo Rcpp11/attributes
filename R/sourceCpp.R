@@ -8,6 +8,7 @@ sourceCppContext <- function(file){
   R_con   <- file( R_temp_file, open = "w" )
          
   buildEnv <- new.env()
+  buildEnv[["USE_CXX1X"]] <- "yes"
     
   ctx <- new.env()
   ctx[["add_cpp"]] = function(code){
