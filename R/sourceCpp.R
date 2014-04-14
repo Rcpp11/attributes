@@ -36,16 +36,18 @@ sourceCppContext <- function(file){
     if( length(ls(buildEnv)) )
       do.call( Sys.setenv, as.list(buildEnv) )
     
+    owd <- setwd( tempdir() )
+    on.exit( { setwd(owd) })
+    
     # SHLIB
     cmd <- paste(R.home(component="bin"), .Platform$file.sep, "R ",
                      "CMD SHLIB ",
-                     "-o ", shQuote(dynlib), " ",
-                     shQuote(cpp_temp_file), sep="")
+                     shQuote(basename(cpp_temp_file)), sep="")
     
     system( cmd, intern = TRUE )
     
     # load
-    dyn.load( dynlib )    
+    dyn.load( basename(dynlib) )    
     
     # run the R code
     source( R_temp_file )
