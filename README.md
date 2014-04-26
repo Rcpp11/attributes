@@ -1,6 +1,8 @@
 attributes
 ==========
 
+[![Build Status](https://travis-ci.org/Rcpp11/attributes.png)](https://travis-ci.org/Rcpp11/attributes)
+
 This is an attempt to implement [Rcpp](https://github.com/RcppCore/Rcpp) attributes outside of Rcpp. 
 
 There are now several implementations of Rcpp : [Rcpp](https://github.com/RcppCore/Rcpp),
