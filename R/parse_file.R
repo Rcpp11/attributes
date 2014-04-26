@@ -79,8 +79,3 @@ parse_attrs <- function(file, keep=NULL) {
   )
   
 }
-
-if (FALSE) {
-  file <- "/Users/kevinushey/git/Rcpp-test/src/DataFrame.cpp"
-  invisible(attributes:::parse_attrs(file))
-}
