@@ -4,7 +4,7 @@
 ##' required. Generates the bindings required to call C++ functions from R for
 ##' functions adorned with the Rcpp::export attribute.
 ##' 
-##' The source files in the package directory given by pkgdir are scanned for
+##' The source files in the package directory given by pkgDir are scanned for
 ##' attributes and code is generated as required based on the attributes.
 ##' 
 ##' For C++ functions adorned with the Rcpp::export attribute, the C++ and R 
@@ -27,7 +27,7 @@
 ##' function can also generate a direct C++ interface to the functions using
 ##' the Rcpp::interfaces attribute.
 ##' 
-##' @param pkgdir Directory containing the package to compile attributes for
+##' @param pkgDir Directory containing the package to compile attributes for
 ##'   (defaults to the current working directory).
 ##' @param verbose \code{TRUE} to print detailed information about generated
 ##'   code to the console.
@@ -36,12 +36,12 @@
 ##'   specified.
 ##' @export
 compileAttributes <- function(
-  pkgdir = ".",
+  pkgDir = ".",
   verbose = FALSE,
   RcppExports.R=TRUE) {
   
-  pkgdir <- normalizePath(pkgdir, winslash = "/")
+  pkgDir <- normalizePath(pkgDir, winslash = "/")
   
-  compileDefaultAttributes(pkgdir, verbose, RcppExports.R)
+  compileDefaultAttributes(pkgDir, verbose, RcppExports.R)
   
 }

@@ -5,7 +5,7 @@
 
 #include <R_ext/Rdynload.h>
 
-SEXP count_newlines(SEXP x_, SEXP n_);
+SEXP count_newlines(SEXP x_, SEXP start_, SEXP end_);
 SEXP get_roxygen_index(SEXP text_, SEXP index_);
 SEXP readfile(SEXP path_);
 SEXP find_next_char(SEXP chr_, SEXP txt_, SEXP ind_);
@@ -17,7 +17,7 @@ SEXP get_cdr(SEXP x);
 SEXP parse_cpp_args(SEXP x_);
 
 R_CallMethodDef callMethods[]  = {
-  {"C_count_newlines", (DL_FUNC) &count_newlines, 2},
+  {"C_count_newlines", (DL_FUNC) &count_newlines, 3},
   {"C_get_roxygen_index", (DL_FUNC) &get_roxygen_index, 2},
   {"C_readfile", (DL_FUNC) &readfile, 1},
   {"C_find_next_char", (DL_FUNC) &find_next_char, 3},

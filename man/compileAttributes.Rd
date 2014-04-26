@@ -3,19 +3,18 @@
 \alias{compileAttributes}
 \title{Compile Rcpp Attributes for a Package}
 \usage{
-compileAttributes(pkgdir = ".", verbose = FALSE, RcppExports.R = TRUE)
+compileAttributes(pkgDir = ".", verbose = FALSE, RcppExports.R = TRUE)
 }
 \arguments{
-  \item{pkgdir}{Directory containing the package to compile
-  attributes for (defaults to the current working
-  directory).}
+\item{pkgDir}{Directory containing the package to compile attributes for
+(defaults to the current working directory).}
 
-  \item{verbose}{\code{TRUE} to print detailed information
-  about generated code to the console.}
+\item{verbose}{\code{TRUE} to print detailed information about generated
+code to the console.}
 
-  \item{RcppExports.R}{Boolean; if \code{TRUE} we write
-  wrapper \R functions out as well. This overrides any
-  \code{// [[Rcpp::interfaces]]} attributes specified.}
+\item{RcppExports.R}{Boolean; if \code{TRUE} we write wrapper \R functions
+out as well. This overrides any \code{// [[Rcpp::interfaces]]} attributes
+specified.}
 }
 \value{
 Returns (invisibly) a character vector with the paths to any
@@ -27,7 +26,7 @@ required. Generates the bindings required to call C++ functions from R for
 functions adorned with the Rcpp::export attribute.
 }
 \details{
-The source files in the package directory given by pkgdir are scanned for
+The source files in the package directory given by pkgDir are scanned for
 attributes and code is generated as required based on the attributes.
 
 For C++ functions adorned with the Rcpp::export attribute, the C++ and R

@@ -1,10 +1,11 @@
 ## Parse exports from a list of attributes
 ## Assume these are the attributes for one file
 parse_exports <- function(attributes) {
-  
+
   allText <- read(attributes$file)
-  
-  lapply(attributes$attributes, function(attr) {
+  output <- vector("list", length(attributes$attributes))
+  for (i in seq_along(output)) {
+    attr <- attributes$attributes[[i]]
     
     ## Get Roxygen comments, if available
     comment_index <- get_roxygen_index(allText, attr$index)
@@ -23,7 +24,8 @@ parse_exports <- function(attributes) {
     txt <- substring(txt, 1, find_next_char("{", txt, 1))
     
     ## Remove excessive whitespace and newlines
-    txt <- gsub("\n|[[:space:]]+", " ", txt)
+    txt <- gsub("[[:space:]]+", " ", txt)
+    txt <- gsub("\\n", "", txt)
     
     ## Get the prototype
     prototype <- gsub("[[:space:]]*\\{", ";", txt)
@@ -49,7 +51,7 @@ parse_exports <- function(attributes) {
     ## Get argument names, types
     parsed_args <- parse_cpp_args(args)
     
-    return( list(
+    output[[i]] <- list(
       prototype=prototype,
       func=function_name,
       type=function_type,
@@ -57,10 +59,12 @@ parse_exports <- function(attributes) {
       arg_types=trim_whitespace(parsed_args[[1]]),
       arg_names=trim_whitespace(parsed_args[[2]]),
       roxygen=roxygen
-    ) )
+    )
     
-  })
-    
+  }
+  
+  output
+
 }
 
 ## Given the parsed information from parse_exports, generate some text that
@@ -82,38 +86,45 @@ parse_exports <- function(attributes) {
 ##     UNPROTECT(1);
 ##     return __sexp_result;
 ## END_RCPP
-## } 
-generate_export <- function(pkgdir, x) {
-  
+## }
+generate_export <- function(pkgDir, x) {
+
   get_input_parameters <- function(x) {
-    paste0("Rcpp::traits::input_parameter< ", x$arg_types, " >::type ", x$arg_names, "( ", x$arg_names, "SEXP );")
+    if (length(x$arg_types) && x$arg_types != "") {
+      paste0("Rcpp::traits::input_parameter< ", x$arg_types, " >::type ", x$arg_names, "( ", x$arg_names, "SEXP );")
+    }
   }
-  
+
   get_result_statement <- function(x) {
     paste( sep="", collapse=" ",
-      x$type, " __result = ", x$func, "(", 
-      paste(x$arg_names, collapse=", "), 
+      x$type, " __result = ", x$func, "(",
+      paste(x$arg_names, collapse=", "),
       ");"
     )
   }
-  
+
   void_result_statement <- function(x) {
     paste( sep="", collapse=" ",
-      x$func, "(", 
-      paste(x$arg_names, collapse=", "), 
+      x$func, "(",
+      paste(x$arg_names, collapse=", "),
       ");"
     )
   }
-  
-  pkg_name <- read.dcf( file.path(pkgdir, "DESCRIPTION") )[,"Package"]
+
+  pkg_name <- read.dcf( file.path(pkgDir, "DESCRIPTION") )[,"Package"]
   comment_header <- paste("//", x$func)
   prototype <- x$prototype
-  defn_args <- paste0("SEXP ", x$arg_names, "SEXP")
+  if (length(x$arg_names)) {
+    defn_args <- paste0("SEXP ", x$arg_names, "SEXP")
+  } else {
+    defn_args <- ""
+  }
+  
   defn_start <- paste0(
     "extern \"C\" SEXP ", paste(pkg_name, x$func, sep="_"), "(",
     paste(defn_args, collapse=", "), ") {"
   )
-  
+
   if (x$type == "void") {
     defn <- c(
       comment_header,
@@ -150,9 +161,9 @@ generate_export <- function(pkgdir, x) {
       ""
     )
   }
-  
-  
-  
+
+
+
   return(defn)
-  
+
 }

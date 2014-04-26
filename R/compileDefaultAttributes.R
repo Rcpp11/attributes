@@ -1,20 +1,20 @@
-compileDefaultAttributes <- function(pkgdir, verbose, RcppExports.R) {
+compileDefaultAttributes <- function(pkgDir, verbose, RcppExports.R) {
   
-  DESCRIPTION <- as.list(read.dcf( file.path(pkgdir, "DESCRIPTION") )[1, ])
+  DESCRIPTION <- as.list(read.dcf( file.path(pkgDir, "DESCRIPTION") )[1, ])
   pkgname <- DESCRIPTION$Package
   
   LinkingTo <- gsub("^[[:space:]]*", "",
     unlist( strsplit( gsub("\\r|\\n", " ", DESCRIPTION$LinkingTo), ",[[:space:]]+" ) )
   )
   
-  srcDir <- file.path(pkgdir, "src")
+  srcDir <- file.path(pkgDir, "src")
 
   ## Get rid of the old RcppExports files if they exist
-  if (file.exists(file <- file.path(pkgdir, "src", "RcppExports.cpp"))) {
+  if (file.exists(file <- file.path(pkgDir, "src", "RcppExports.cpp"))) {
     unlink(file)
   }
   
-  if (file.exists(file <- file.path(pkgdir, "R", "RcppExports.R"))) {
+  if (file.exists(file <- file.path(pkgDir, "R", "RcppExports.R"))) {
     unlink(file)
   }
   
@@ -28,7 +28,7 @@ compileDefaultAttributes <- function(pkgdir, verbose, RcppExports.R) {
   exports <- unlist( lapply(export_attrs, parse_exports), recursive=FALSE )
   
   if (length(exports)) {
-    defns <- lapply(exports, generate_export, pkgdir=pkgdir)
+    defns <- lapply(exports, generate_export, pkgDir=pkgDir)
     
     ## Write out the RcppExports.cpp file
     
@@ -49,14 +49,14 @@ compileDefaultAttributes <- function(pkgdir, verbose, RcppExports.R) {
       )
     )
     
-    cat(RcppExports.cpp, file=file.path(pkgdir, "src", "RcppExports.cpp"))
+    cat(RcppExports.cpp, file=file.path(pkgDir, "src", "RcppExports.cpp"))
     
     ## Similarily, we must generate an RcppExports.R file
     make_R_function <- function(export) {
       Rfun <- paste( sep="\n",
         tab(0, export$roxygen),
         tab(0, paste0(export$func, " <- function(", paste(export$arg_names, collapse=", "), ") {")),
-        tab(1, ".Call('", paste(pkgname, export$func, sep="_"), "', PACKAGE='", pkgname, "', ",
+        tab(1, ".Call('", paste(pkgname, export$func, sep="_"), "', PACKAGE = '", pkgname, "', ",
           paste(export$arg_names, collapse=", "), ")"),
         tab(0, "}"),
         "\n"
@@ -69,7 +69,7 @@ compileDefaultAttributes <- function(pkgdir, verbose, RcppExports.R) {
         lapply(exports, make_R_function)
       )
       
-      cat(RcppExports.R, file=file.path(pkgdir, "R", "RcppExports.R"))
+      cat(RcppExports.R, file=file.path(pkgDir, "R", "RcppExports.R"))
     }
     
   }

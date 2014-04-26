@@ -6,3 +6,6 @@ src/*.so
 src/*.dll
 
 attributes.Rproj
+
+*~
+\#

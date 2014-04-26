@@ -1,3 +1,16 @@
+## a regex that should match all attribute-worthy code
+
+pattern <- paste0(
+  "\n", ## find a newline
+  "[[:blank:]]*", ## allow for indentation
+  "//[[:blank:]]*", ## the comment should be started by //, with potential spaces following
+  "\\[\\[", ## the opening square brackets
+  "[[:space:]]*(.*?)[[:space:]]*", ## the material within
+  "\\]\\]" ## closing brackets
+)
+
+pattern_no_new_line <- substring(pattern, 2, nchar(pattern))
+
 get_attrs <- function(x) {
   ## change Rcpp:: to attributes::
   x <- gsub("Rcpp::", "attributes::", x, perl=TRUE)
@@ -18,37 +31,41 @@ parse_attrs <- function(file, keep=NULL) {
   ## read the file
   txt <- read(file)
   
-  ## a regex that should match all attribute-worthy code
-  pattern <- rex <- 
-    "//[[:space:]]*\\[\\[[[:space:]]*(.*?)[[:space:]]*\\]\\]"
-  
   ## get the indices at which we saw attributes
-  matches <- gregexpr(rex, txt, perl=TRUE)
-  ind <- c( matches[[1]] )
+  matches <- gregexpr(pattern, txt, perl=TRUE)
+  ind <- c( matches[[1]] ) + 1L ## offset for newline matched
   if (identical(ind, -1L)) {
     return( list() )
   }
   n <- length(ind)
   
-  parsed_attributes <- lapply(ind, function(i) {
-    before <- tryCatch( find_prev_char("\n", txt, i) + 1,
-      error=function(e) return (1)
+  parsed_attributes <- vector("list", n)
+  for (idx in seq_along(parsed_attributes)) {
+    
+    ## Get the index locating the start of the attribute
+    i <- ind[[idx]]
+    
+    ## We add and subtract 1 to strip off the newline
+    before <- tryCatch( find_prev_char("\n", txt, i),
+                        error=function(e) return (1)
     )
-    after <- tryCatch( find_next_char("\n", txt, i) - 1,
-      error=function(e) return (nchar(txt))
+    
+    after <- tryCatch( find_next_char("\n", txt, i),
+                       error=function(e) return (nchar(txt))
     )
-    row <- count_newlines(txt, before) + 1L
+    
+    row <- count_newlines(txt, end = after)
     line <- substring(txt, before, after)
-    code <- gsub(pattern, "\\1", line, perl=TRUE)
+    code <- gsub(pattern_no_new_line, "\\1", line, perl=TRUE)
     attrs <- get_attrs(code)
-    list(
+    parsed_attributes[[idx]] <- list(
       string=line,
       code=code,
       index=i,
       row=row,
       attrs=attrs
     )
-  })
+  }
   
   if (!is.null(keep)) {
     parsed_attributes <- parsed_attributes[ sapply(parsed_attributes, function(x) {
@@ -61,4 +78,9 @@ parse_attrs <- function(file, keep=NULL) {
     attributes=parsed_attributes
   )
   
+}
+
+if (FALSE) {
+  file <- "/Users/kevinushey/git/Rcpp-test/src/DataFrame.cpp"
+  invisible(attributes:::parse_attrs(file))
 }

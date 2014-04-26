@@ -21,8 +21,8 @@ parse_cpp_args <- function(args) {
   .Call(C_parse_cpp_args, as.character(args))
 }
 
-count_newlines <- function(text, index=nchar(text)) {
-  .Call(C_count_newlines, as.character(text), as.integer(index))
+count_newlines <- function(text, start=1L, end=nchar(text)) {
+  .Call(C_count_newlines, as.character(text), as.integer(start), as.integer(end))
 }
 
 read <- function(path) {

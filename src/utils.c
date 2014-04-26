@@ -2,7 +2,7 @@
 #include <Rinternals.h>
 
 int cfind_next_char(const char chr, const char* txt, int ind, int n) {
-  int i = ind + 1;
+  int i = ind; // we do allow matching of the current character
   while (i < n) {
     if (txt[i] == chr) return i;
     ++i;
@@ -32,7 +32,7 @@ SEXP find_next_char(SEXP chr_, SEXP txt_, SEXP ind_) {
 }
 
 int cfind_prev_char(const char chr, const char* txt, int ind) {
-  int i = ind - 1;
+  int i = ind - 1; // we don't match the current character
   while (i >= 0) {
     if (txt[i] == chr) return i;
     --i;
