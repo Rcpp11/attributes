@@ -58,11 +58,11 @@ struct State {
     // Check if we are entering, or leaving, a string
     if (x[itr] == '"') {
       if (!inString) {
-	debug(Rprintf("Inside string at index %i\n", itr));
-	inString = true;
+        debug(Rprintf("Inside string at index %i\n", itr));
+        inString = true;
       } else if (x[itr - 1] != '\\') {
-	debug(Rprintf("Leaving string at index %i\n", itr));
-	inString = false;
+        debug(Rprintf("Leaving string at index %i\n", itr));
+        inString = false;
       }
     }
 
@@ -194,10 +194,10 @@ size_t find_next_start(std::string const& x, size_t itr) {
       if (itr >= x.size()) return x.size();
       state.update(x, itr);
       if (state.good() && x[itr] == ',') {
-	debug(Rprintf("Found a ',' at index %i\n", itr));
-	itr = skip_whitespace_fwd(x, itr + 1);
-	debug(Rprintf("Skipped over whitespace to new start at index %i\n", itr));
-	return itr;
+        debug(Rprintf("Found a ',' at index %i\n", itr));
+        itr = skip_whitespace_fwd(x, itr + 1);
+        debug(Rprintf("Skipped over whitespace to new start at index %i\n", itr));
+        return itr;
       }
       
     }
@@ -217,82 +217,82 @@ size_t find_next_start(std::string const& x, size_t itr) {
 
 extern "C" {
 
-// [[register]]
-SEXP parse_cpp_args(SEXP x_) {
+  // [[register]]
+  SEXP parse_cpp_args(SEXP x_) {
   
-  std::string x( CHAR( STRING_ELT(x_, 0) ) );
-  std::vector<std::string> names;
-  std::vector<std::string> types;
-  State state;
+    std::string x( CHAR( STRING_ELT(x_, 0) ) );
+    std::vector<std::string> names;
+    std::vector<std::string> types;
+    State state;
   
-  debug(Rprintf("Trying to parse string '%s'\n", x.c_str()));
+    debug(Rprintf("Trying to parse string '%s'\n", x.c_str()));
   
-  // We have to keep track of a few locations in order to parse the function
-  // declaration -- e.g. for 'const std::vector<int> x = {1, 2, 3}', we need:
-  // 1. The start and end of the type,
-  // 2. The start and end of the argument name
+    // We have to keep track of a few locations in order to parse the function
+    // declaration -- e.g. for 'const std::vector<int> x = {1, 2, 3}', we need:
+    // 1. The start and end of the type,
+    // 2. The start and end of the argument name
   
-  // The main iterator looking through the string
-  size_t itr = 0;
+    // The main iterator looking through the string
+    size_t itr = 0;
   
-  // Other iterators that will hold position
-  size_t type_end   = 0;
-  size_t name_start = 0;
-  size_t name_end   = 0;
+    // Other iterators that will hold position
+    size_t type_end   = 0;
+    size_t name_start = 0;
+    size_t name_end   = 0;
   
-  // Skip over initial whitespace
-  itr = skip_whitespace_fwd(x, itr);
-  size_t type_start = itr;
+    // Skip over initial whitespace
+    itr = skip_whitespace_fwd(x, itr);
+    size_t type_start = itr;
 
-  size_t n = x.size();
+    size_t n = x.size();
   
-  while (itr < n) {
+    while (itr < n) {
 
-    itr = find_delimiter(x, itr, &state);
+      itr = find_delimiter(x, itr, &state);
 
-    name_end = find_name_end(x, itr);
-    debug(Rprintf("Found name end at index %i\n", name_end)); 
-    debug(Rprintf("Setting name_end at %i (character '%c')\n", name_end, x[name_end]));
+      name_end = find_name_end(x, itr);
+      debug(Rprintf("Found name end at index %i\n", name_end)); 
+      debug(Rprintf("Setting name_end at %i (character '%c')\n", name_end, x[name_end]));
     
-    name_start = find_name_start(x, name_end - 1);
-    debug(Rprintf("Setting name_start at %i\n", name_start));
+      name_start = find_name_start(x, name_end - 1);
+      debug(Rprintf("Setting name_start at %i\n", name_start));
 
-    type_end = skip_whitespace_bwd(x, name_start - 1) + 1;
-    debug(Rprintf("Setting type_end at %i\n", type_end));
+      type_end = skip_whitespace_bwd(x, name_start - 1) + 1;
+      debug(Rprintf("Setting type_end at %i\n", type_end));
     
-    add_to(types, x, type_start, type_end);
-    add_to(names, x, name_start, name_end);
+      add_to(types, x, type_start, type_end);
+      add_to(names, x, name_start, name_end);
     
-    itr = find_next_start(x, itr);
-    debug(Rprintf("Starting next lookup at %i\n", itr));
-    type_start = itr;
+      itr = find_next_start(x, itr);
+      debug(Rprintf("Starting next lookup at %i\n", itr));
+      type_start = itr;
     
-    state.reset();
-    debug(Rprintf("\n\n"));
+      state.reset();
+      debug(Rprintf("\n\n"));
     
+    }
+  
+    // Generate an R list to hold the results
+    int nnames = names.size();
+    int ntypes = types.size();
+  
+    SEXP result = PROTECT( Rf_allocVector(VECSXP, 2) );
+    SEXP Rtypes = PROTECT( Rf_allocVector(STRSXP, ntypes) );
+    for (int i=0; i < ntypes; ++i) {
+      SET_STRING_ELT(Rtypes, i, Rf_mkChar(types[i].c_str()));
+    }
+  
+    SEXP Rnames = PROTECT( Rf_allocVector(STRSXP, nnames) );
+    for (int i=0; i < nnames; ++i) {
+      SET_STRING_ELT(Rnames, i, Rf_mkChar(names[i].c_str()));
+    }
+  
+    SET_VECTOR_ELT(result, 0, Rtypes);
+    SET_VECTOR_ELT(result, 1, Rnames);
+  
+    UNPROTECT(3);
+    return result;
+  
   }
-  
-  // Generate an R list to hold the results
-  int nnames = names.size();
-  int ntypes = types.size();
-  
-  SEXP result = PROTECT( Rf_allocVector(VECSXP, 2) );
-  SEXP Rtypes = PROTECT( Rf_allocVector(STRSXP, ntypes) );
-  for (int i=0; i < ntypes; ++i) {
-    SET_STRING_ELT(Rtypes, i, Rf_mkChar(types[i].c_str()));
-  }
-  
-  SEXP Rnames = PROTECT( Rf_allocVector(STRSXP, nnames) );
-  for (int i=0; i < nnames; ++i) {
-    SET_STRING_ELT(Rnames, i, Rf_mkChar(names[i].c_str()));
-  }
-  
-  SET_VECTOR_ELT(result, 0, Rtypes);
-  SET_VECTOR_ELT(result, 1, Rnames);
-  
-  UNPROTECT(3);
-  return result;
-  
-}
 
 }
