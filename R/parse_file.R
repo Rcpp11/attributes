@@ -16,6 +16,11 @@ get_attrs <- function(x) {
   ## change Rcpp:: to attributes::
   x <- gsub("Rcpp::", "attributes::", x, perl=TRUE)
 
+  ## if there is no '::', assume it's an 'attributes' attribute
+  if (!grepl("::", x, fixed=TRUE)) {
+    x <- paste0("attributes::", x)
+  }
+
   ## wrap x in a function call, so we can handle arbitrary expressions
   call <- parse(text=paste0("dummy(", x, ")"))[[1]]
 
@@ -50,11 +55,11 @@ parse_attrs <- function(file, keep=NULL) {
     ## Get the index locating the start of the attribute
     i <- ind[[idx]]
 
-    before <- tryCatch( find_prev_char("\n", txt, i),
+    before <- tryCatch( find_prev_char("\n", txt, i) + 1L,
                         error=function(e) return (1)
     )
 
-    after <- tryCatch( find_next_char("\n", txt, i),
+    after <- tryCatch( find_next_char("\n", txt, i) - 1L,
                        error=function(e) return (nchar(txt))
     )
 
