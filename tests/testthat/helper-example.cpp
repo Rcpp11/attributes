@@ -1,8 +1,9 @@
+// [[Rcpp::depends(RcppArmadillo)]]
 #include <Rcpp.h>
 using namespace Rcpp ;
 
 
-// [[Rcpp::export]]
+// [[Rcpp::export(R_foo)]]
 int foo(int a, 
     int b = 22
     ){
@@ -23,3 +24,7 @@ int bar() {
 int baz(int bat) {
   return bat;
 }
+
+// Something that isn't an Rcpp::export attribute
+// [[attributes::somethingElse]]
+void somethingElse() {}

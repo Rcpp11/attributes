@@ -3,10 +3,18 @@
 parse_exports <- function(attributes) {
 
   allText <- read(attributes$file)
+
+  ## Use only 'export' attributes
+  attributes$attributes <- attributes$attributes[
+    sapply(attributes$attributes, function(x) {
+      grepl("attributes::export", capture.output(x$attrs))
+    })
+	]
+
   output <- vector("list", length(attributes$attributes))
   for (i in seq_along(output)) {
     attr <- attributes$attributes[[i]]
-    
+
     ## Get Roxygen comments, if available
     comment_index <- get_roxygen_index(allText, attr$index)
     if (!is.null(comment_index)) {
@@ -14,43 +22,49 @@ parse_exports <- function(attributes) {
     } else {
       roxygen <- NULL
     }
-    
+
     txt <- substring(allText, attr$index, nchar(allText))
-    
+
     ## Strip out comments
     txt <- strip_comments(txt)
-    
+
     ## Get up to the next "{"
     txt <- substring(txt, 1, find_next_char("{", txt, 1))
-    
+
     ## Remove excessive whitespace and newlines
     txt <- gsub("[[:space:]]+", " ", txt)
     txt <- gsub("\\n", "", txt)
-    
+
     ## Get the prototype
     prototype <- gsub("[[:space:]]*\\{", ";", txt)
-    
+
     ## Get the arguments
     args_end <- find_prev_char(")", txt, nchar(txt))
     args_begin <- find_matching_char(txt, args_end)
     args <- substring(txt, args_begin+1, args_end-1)
-    
+
     ## Clean out the whitespace
-    args <- gsub("^[[:space:]]", "", args)
-    args <- gsub("[[:space:]]$", "", args)
-    
+    args <- trim_whitespace(args)
+
     ## The function name comes immediately before the args_begin paren
     substr <- substring(txt, 1, args_begin - 1)
     substr <- gsub("[[:space:]]*$", "", substr)
     function_name <- gsub(".*[[:space:]]", "", substr)
-    
+
     ## We extract the type from everything before the function name
     function_type <- gsub( paste0(function_name, ".*"), "", prototype )
     function_type <- gsub("[[:space:]]*$", "", gsub("const ", "", function_type))
-    
+
     ## Get argument names, types
     parsed_args <- parse_cpp_args(args)
-    
+
+    ## Get the export name
+    if (attr$attrs[[1]] == "::") { ## occurs when attributes::export passed w/no args
+      export_name <- function_name
+    } else {
+      export_name <- as.character(attr$attrs[[2]])
+    }
+
     output[[i]] <- list(
       prototype=prototype,
       func=function_name,
@@ -58,11 +72,13 @@ parse_exports <- function(attributes) {
       args=args,
       arg_types=trim_whitespace(parsed_args[[1]]),
       arg_names=trim_whitespace(parsed_args[[2]]),
-      roxygen=roxygen
+      roxygen=roxygen,
+      R_name=export_name,
+      file=attributes$file
     )
-    
+
   }
-  
+
   output
 
 }
@@ -112,16 +128,16 @@ generate_export <- function(pkgDir, x) {
   }
 
   pkg_name <- read.dcf( file.path(pkgDir, "DESCRIPTION") )[,"Package"]
-  comment_header <- paste("//", x$func)
+  comment_header <- paste("//", x$R_name)
   prototype <- x$prototype
   if (length(x$arg_names)) {
     defn_args <- paste0("SEXP ", x$arg_names, "SEXP")
   } else {
     defn_args <- ""
   }
-  
+
   defn_start <- paste0(
-    "extern \"C\" SEXP ", paste(pkg_name, x$func, sep="_"), "(",
+    "extern \"C\" SEXP ", paste(pkg_name, x$R_name, sep="_"), "(",
     paste(defn_args, collapse=", "), ") {"
   )
 

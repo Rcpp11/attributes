@@ -10,6 +10,7 @@ test_that("parse_exports works as expected", {
   
   attributes <- parse_attrs("helper-example.cpp")
   exports <- parse_exports(attributes)
+  expect_identical(exports[[1]]$R_name, "R_foo")
   lapply(exports, generate_export, pkgDir="../../")
   
 })
