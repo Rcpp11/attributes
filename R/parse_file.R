@@ -19,11 +19,7 @@ get_attrs <- function(x) {
   ## wrap x in a function call, so we can handle arbitrary expressions
   call <- parse(text=paste0("dummy(", x, ")"))[[1]]
 
-  ## if the call is a symbol, make it a function call with no arguments
-  ## easier for consistent handling
-  res <- as.list(call[2:length(call)])[[1]]
-
-  res
+  as.list(call[2:length(call)])[[1]]
 
 }
 
