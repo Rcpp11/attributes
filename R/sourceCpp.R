@@ -156,7 +156,7 @@ sourceCpp <- function( file, Rcpp = "Rcpp11", handlers = sourceCppHandlers() ){
     # using do.call so that parameter matching works for us
     # to handle default arguments
     args <- append( list(attribute = att, context = context), att$param ) 
-    do.call( handler, args )
+    if(!is.null(handler)) do.call( handler, args )
   }
   
   # add the LinkingTo: Rcpp*

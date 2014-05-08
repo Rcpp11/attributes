@@ -52,7 +52,7 @@ parse_attributes <- function(file){
         )
         
       } else if( is.call(expr) && is.call(expr[[1L]]) && expr[[1L]][[1L]] == double_colon  ){
-        name <- sprintf( "%s::%s", expr[[1L]][[2L]], expr[[1L]][[3L]] )
+        name <- sprintf( "%s::%s", as.character(expr[[1L]][[2L]]), as.character(expr[[1L]][[3L]]) )
         single_line_attributes[[i]] <- structure(
           list( 
             file = file, line = line, content = code, name = name, param = as.list(cdr(expr))
