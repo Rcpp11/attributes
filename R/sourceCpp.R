@@ -166,11 +166,15 @@ sourceCpp <- function( file, Rcpp = "Rcpp11", handlers = sourceCppHandlers() ){
   for( att in attributes$attributes ){
     # generate code or contribute to build environment
     handler <- handlers[[att$name]]
+    if( is.null(handler) ){
+      warning( sprintf("unknown attribute '%s' ", att$name) )  
+    } else {
     
-    # using do.call so that parameter matching works for us
-    # to handle default arguments
-    args <- append( list(attribute = att, context = context), att$param ) 
-    if(!is.null(handler)) do.call( handler, args )
+      # using do.call so that parameter matching works for us
+      # to handle default arguments
+      args <- append( list(attribute = att, context = context), att$param ) 
+      do.call( handler, args )
+    }
   }
   
   # add the LinkingTo: Rcpp*
