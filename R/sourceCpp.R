@@ -139,6 +139,20 @@ extern "C" SEXP sourceCpp_%s( %s ){
   
 }   
 
+sourceCppHandlersEnv[["Rcpp::depends"]] <- function(attribute, context, ...){
+  packages <- sapply( attribute$param, as.character )
+  # emulate LinkingTo
+
+  paths <- sapply( packages, function(.){
+    system.file( "include", package = . )
+  })
+  paths <- paths[ paths != "" ]
+  
+  flag <- paste( sprintf( '-I"%s"', paths ), collapse = " " )
+  context$build_param( "CLINK_CPPFLAGS", flag )
+  
+}
+
 sourceCppHandlers <- function(){
   sourceCppHandlersEnv  
 }
