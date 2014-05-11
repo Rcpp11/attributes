@@ -158,7 +158,13 @@ sourceCppHandlers <- function(){
 }
 
 ##' @export
-sourceCpp <- function( file, Rcpp = "Rcpp11", handlers = sourceCppHandlers() ){
+sourceCpp <- function( file, Rcpp = "Rcpp11", handlers = sourceCppHandlers(), code = NULL ){
+
+  ## if 'code' is specified, write it to a temporary file and compile from that
+  if (!is.null(code)) {
+    file <- tempfile(fileext = ".R")
+    writeLines(code, con = file)
+  }
 
   attributes <- parse_attributes(file)
   context <- sourceCppContext(file)

@@ -1,5 +1,7 @@
 ## a regex that should match all attribute-worthy code
 
+## NOTE: We match against \n instead of ^ because it's expected that this regex
+## will pass through an entire souce file read in as a string.
 pattern <- paste0(
   "\n", ## find a newline
   "[[:blank:]]*", ## allow for indentation

@@ -4,7 +4,7 @@ cdr <- function(x){
 
 parse_attributes <- function(file){
   # attribute regex
-  rx <- "^//[[:space:]][[][[](.*)[]][]].*$"
+  rx <- "^[[:blank:]]*//[[:space:]][[][[](.*)[]][]].*$"
 
   # find matches
   code <- readLines(file)
