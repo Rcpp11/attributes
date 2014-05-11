@@ -49,7 +49,7 @@ trim_whitespace <- function(txt) {
 }
 
 find_next_char <- function(chr, txt, ind) {
-  return( .Call(C_find_next_char, 
+  return( .Call(C_find_next_char,
     as.character(chr),
     as.character(txt),
     as.integer(ind)
@@ -57,7 +57,7 @@ find_next_char <- function(chr, txt, ind) {
 }
 
 find_prev_char <- function(chr, txt, ind) {
-  return( .Call(C_find_prev_char, 
+  return( .Call(C_find_prev_char,
     as.character(chr),
     as.character(txt),
     as.integer(ind)
@@ -70,20 +70,20 @@ find_matching_char <- function(txt, ind) {
   if (is.na(cmp)) {
     stop("no complementary character for '", chr, "'")
   }
-  
+
   if (chr %in% c("[", "(", "{")) {
-    .Call( C_find_matching_char__fwd, 
-      as.character(chr), 
-      as.character(cmp), 
+    .Call( C_find_matching_char__fwd,
+      as.character(chr),
+      as.character(cmp),
       as.character(txt),
-      as.integer(ind) 
+      as.integer(ind)
     )
   } else {
     .Call( C_find_matching_char__bwd,
-      as.character(chr), 
-      as.character(cmp), 
+      as.character(chr),
+      as.character(cmp),
       as.character(txt),
-      as.integer(ind) 
+      as.integer(ind)
     )
   }
 }
