@@ -62,7 +62,7 @@ compileDefaultAttributes <- function(pkgDir, verbose, RcppExports.R) {
     make_R_function <- function(export) {
       Rfun <- paste( sep="\n",
         tab(0, export$roxygen),
-        tab(0, paste0(export$func, " <- function(", paste(export$arg_names, collapse=", "), ") {")),
+        tab(0, paste0(export$R_name, " <- function(", paste(export$arg_names, collapse=", "), ") {")),
         tab(1, ".Call('", paste(pkgname, export$func, sep="_"), "', PACKAGE = '", pkgname, "', ",
           paste(export$arg_names, collapse=", "), ")"),
         tab(0, "}"),

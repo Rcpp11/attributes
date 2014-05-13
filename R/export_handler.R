@@ -137,7 +137,7 @@ generate_export <- function(pkgDir, x) {
   }
 
   defn_start <- paste0(
-    "extern \"C\" SEXP ", paste(pkg_name, x$R_name, sep="_"), "(",
+    "extern \"C\" SEXP ", paste(pkg_name, x$func, sep="_"), "(",
     paste(defn_args, collapse=", "), ") {"
   )
 
