@@ -28,7 +28,7 @@ sourceCppContext <- function(file){
       buildEnv[[name]] <- paste( buildEnv[[name]], value )
     }
   }
-  ctx[["compile"]] = function(){
+  ctx[["compile"]] = function(verbose = FALSE){
     # finish
     close(cpp_con)
     close(R_con)
@@ -45,7 +45,9 @@ sourceCppContext <- function(file){
                      "CMD SHLIB ",
                      shQuote(basename(cpp_temp_file)), sep="")
 
-    system( cmd, intern = TRUE )
+    if( verbose ) writeLines(cmd)
+    out <- system( cmd, intern = TRUE )
+    if( verbose ) writeLines(out)
 
     # load
     dyn.load( basename(dynlib) )
@@ -158,7 +160,7 @@ sourceCppHandlers <- function(){
 }
 
 ##' @export
-sourceCpp <- function( file, Rcpp = "Rcpp11", handlers = sourceCppHandlers(), code = NULL ){
+sourceCpp <- function( file, Rcpp = "Rcpp11", handlers = sourceCppHandlers(), code = NULL, verbose = getOption("verbose") ){
 
   ## if 'code' is specified, write it to a temporary file and compile from that
   if (!is.null(code)) {
@@ -186,7 +188,7 @@ sourceCpp <- function( file, Rcpp = "Rcpp11", handlers = sourceCppHandlers(), co
   # add the LinkingTo: Rcpp*
   context$build_param( "CLINK_CPPFLAGS", .buildClinkCppFlags(Rcpp) )
 
-  context$compile()
+  context$compile(verbose)
 
   for( chunk in attributes$r_code_chunks ){
     temp <- tempfile( fileext = ".R" )
