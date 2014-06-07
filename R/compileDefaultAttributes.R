@@ -98,8 +98,9 @@ compileDefaultAttributes <- function(pkgDir, verbose, RcppExports.R) {
       )
 
       cat(
-        paste(sep="\n", RcppHeader, RcppExports.R),
-        file=file.path(pkgDir, "R", "RcppExports.R")
+        RcppHeader, RcppExports.R,
+        sep = "\n",
+        file = file.path(pkgDir, "R", "RcppExports.R")
       )
     }
 
