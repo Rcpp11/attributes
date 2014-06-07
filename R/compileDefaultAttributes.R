@@ -61,11 +61,18 @@ compileDefaultAttributes <- function(pkgDir, verbose, RcppExports.R) {
     make_R_function <- function(export) {
 
       ## Similarily, we must generate an RcppExports.R file
+
+      ## Special-case Dots, NamedDots
+      which_dots <- which(export$arg_types %in% c("Dots", "NamedDots"))
+      export$arg_names[which_dots] <- "..."
+
       peq <- function(x, y) paste(x, y, sep = " = ")
       fn_name <- paste(pkgname, export$func, sep = "_")
       pkg_arg <- peq("PACKAGE", shQuote(pkgname))
+      export_args <- export$arg_names
+      export_args[export_args == "..."] <- "environment()"
       if (length(export$arg_names)) {
-        fn_args <- paste(pkg_arg, paste(export$arg_names, collapse = ", "), sep = ", ")
+        fn_args <- paste(pkg_arg, paste(export_args, collapse = ", "), sep = ", ")
       } else {
         fn_args <- pkg_arg
       }
