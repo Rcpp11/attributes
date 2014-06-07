@@ -61,7 +61,7 @@ compileDefaultAttributes <- function(pkgDir, verbose, RcppExports.R) {
     make_R_function <- function(export) {
 
       ## Special-case Dots, NamedDots
-      which_dots <- which(export$arg_types %in% c("Dots", "NamedDots"))
+      which_dots <- which(export$arg_types %in% c("Dots", "NamedDots", "Rcpp::Dots", "Rcpp::NamedDots"))
       export$arg_names[which_dots] <- "..."
 
       peq <- function(x, y) paste(x, y, sep = " = ")
