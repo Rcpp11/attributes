@@ -60,8 +60,6 @@ compileDefaultAttributes <- function(pkgDir, verbose, RcppExports.R) {
 
     make_R_function <- function(export) {
 
-      ## Similarily, we must generate an RcppExports.R file
-
       ## Special-case Dots, NamedDots
       which_dots <- which(export$arg_types %in% c("Dots", "NamedDots"))
       export$arg_names[which_dots] <- "..."
@@ -80,11 +78,13 @@ compileDefaultAttributes <- function(pkgDir, verbose, RcppExports.R) {
         shQuote(fn_name),
         fn_args
       )
+      .Call <- paste0(".Call(", paste(callArgs, collapse = ", "), ")")
+      if (export$type == "void") .Call <- paste0("invisible(", .Call, ")")
 
       Rfun <- paste( sep="\n",
         tab(0, export$roxygen),
         tab(0, paste0(export$R_name, " <- function(", paste(export$arg_names, collapse=", "), ") {")),
-        tab(1, ".Call(", paste(callArgs, collapse = ", "), ")"),
+        tab(1, .Call),
         tab(0, "}")
       )
     }
