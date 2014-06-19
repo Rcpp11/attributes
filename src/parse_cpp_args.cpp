@@ -126,7 +126,7 @@ size_t find_name_start(std::string const& x, size_t itr) {
 //                     ^                    ^
 size_t find_delimiter(std::string const& x, size_t itr, State* state) {
 
-  int n = x.size();
+  size_t n = x.size();
   while (itr < n) {
 
     state->update(x, itr);
@@ -179,7 +179,7 @@ size_t find_next_start(std::string const& x, size_t itr) {
 
   debug(Rprintf("Finding next start from a '%c'\n", x[itr]));
 
-  int nextDelim = x.find_first_of("=,", itr);
+  size_t nextDelim = x.find_first_of("=,", itr);
   if (nextDelim == std::string::npos) {
     debug(Rprintf("Could not find a new location to start\n"));
     return x.size();

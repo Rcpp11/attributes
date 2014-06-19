@@ -40,7 +40,7 @@ std::string get_function_signature( SEXP txt, int pos ){
     // get everything before the first '{'
     std::stringstream res ; 
     while( true ){
-      int brace_pos = current_line.find('{') ;
+      size_t brace_pos = current_line.find('{') ;
       if( brace_pos == std::string::npos ){
         res << current_line << ' ' ;
         current_line = CHAR(STRING_ELT(txt, ++pos)) ;
