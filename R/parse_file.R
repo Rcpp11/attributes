@@ -33,12 +33,7 @@ get_attrs <- function(x) {
 ## Parse the Attributes within a C/C++ Source File
 parse_attrs <- function(file, keep=NULL) {
 
-  ## normalize the file name and check it exists
-  if (!file.exists(file)) {
-    stop("no file at location '", file, "'")
-  }
-
-  file <- normalizePath(file, mustWork=TRUE)
+  file <- normalizePath(file, mustWork = TRUE)
 
   ## read the file
   txt <- read(file)

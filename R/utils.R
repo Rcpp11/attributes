@@ -26,10 +26,7 @@ count_newlines <- function(text, start=1L, end=nchar(text)) {
 }
 
 read <- function(path) {
-  if (!file.exists(path)) {
-    stop("no file at path '", path, "'")
-  }
-  path <- normalizePath(path, mustWork=TRUE)
+  path <- normalizePath(path, mustWork = TRUE)
   if (length(path) != 1) stop("'path' should be a single string")
   normalize_newlines( .Call(C_readfile, path) )
 }
