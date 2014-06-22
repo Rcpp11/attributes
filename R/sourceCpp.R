@@ -72,7 +72,7 @@ sourceCppHandlersEnv[["Rcpp::export"]] <- function(attribute, context, ...){
   is_void <- identical( return_type, "void" )
 
   # generate C++ code
-  input_parameters <- sprintf( "Rcpp::traits::input_parameter<%s>::type %s(%sSEXP) ;", sapply(arguments, "[[", 1L), names(arguments), names(arguments) )
+  input_parameters <- sprintf( "InputParameter<%s> %s(%sSEXP) ;", sapply(arguments, "[[", 1L), names(arguments), names(arguments) )
 
   return_txt <- if( is_void ){
       sprintf( "%s(%s) ; __sexp_result = R_NilValue ;", name, paste(names(arguments), collapse = ", " ) )

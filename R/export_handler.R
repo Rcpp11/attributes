@@ -94,8 +94,8 @@ parse_exports <- function(attributes) {
 ##     SEXP __sexp_result;
 ##     {
 ##         Rcpp::RNGScope __rngScope;
-##         Rcpp::traits::input_parameter< RObject >::type x_(x_SEXP );
-##         Rcpp::traits::input_parameter< bool >::type inplace(inplaceSEXP );
+##         InputParameter< RObject > x_(x_SEXP );
+##         InputParameter< bool > inplace(inplaceSEXP );
 ##         RObject __result = char_to_factor(x_, inplace);
 ##         PROTECT(__sexp_result = Rcpp::wrap(__result));
 ##     }
@@ -107,7 +107,7 @@ generate_export <- function(pkgDir, x) {
 
   get_input_parameters <- function(x) {
     if (length(x$arg_types) && x$arg_types != "") {
-      paste0("Rcpp::traits::input_parameter< ", x$arg_types, " >::type ", x$arg_names, "( ", x$arg_names, "SEXP );")
+      paste0("InputParameter< ", x$arg_types, " > ", x$arg_names, "( ", x$arg_names, "SEXP );")
     }
   }
 
