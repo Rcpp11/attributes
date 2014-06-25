@@ -45,9 +45,11 @@ sourceCppContext <- function(file){
                      "CMD SHLIB ",
                      shQuote(basename(cpp_temp_file)), sep="")
 
-    if( verbose ) writeLines(cmd)
-    out <- system( cmd, intern = TRUE )
-    if( verbose ) writeLines(out)
+    if (verbose) writeLines(cmd)
+    if (verbose)
+      system(cmd)
+    else
+      system(cmd, ignore.stdout = TRUE, ignore.stderr = TRUE)
 
     # load
     dyn.load( basename(dynlib) )
