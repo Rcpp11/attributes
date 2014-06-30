@@ -44,7 +44,8 @@ sourceCppContext <- function(file){
     cmd <- paste(R.home(component="bin"), .Platform$file.sep, "R ",
                      "CMD SHLIB ",
                      shQuote(basename(cpp_temp_file)), sep="")
-
+    file.copy(cpp_temp_file, "/tmp/keep")
+    if( verbose ) writeLines(readLines(cpp_temp_file))
     if( verbose ) writeLines(cmd)
     out <- system( cmd, intern = TRUE )
     if( verbose ) writeLines(out)
