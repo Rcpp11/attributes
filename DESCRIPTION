@@ -3,10 +3,9 @@ Title: Standalone implementation of Rcpp attributes
 Description: Standalone implementation of Rcpp attributes
 Version: 0.0
 Date: 2013-11-14
-Authors@R: c( 
-  person("Romain", "Francois", role = c("aut", "cre"), email = "romain@r-enthusiasts.com"), 
-  person("Kevin", "Ushey", role = "aut", email = "kevinushey@gmail.com" ) 
-  )
+Authors@R: c( person("Romain", "Francois", role = c("aut", "cre"), email =
+    "romain@r-enthusiasts.com"), person("Kevin", "Ushey", role = "aut", email =
+    "kevinushey@gmail.com" ) )
 Depends:
     R (>= 3.1.0)
 Imports:

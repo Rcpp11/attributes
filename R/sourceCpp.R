@@ -8,7 +8,12 @@ sourceCppContext <- function(file){
   R_con   <- file( R_temp_file, open = "w" )
 
   buildEnv <- new.env()
-  buildEnv[["USE_CXX1X"]] <- "yes"
+  if (is.mavericks.system() && is.snowleopard.R()) {
+    ## work around USE_CXX1X breaking on this combo
+    buildEnv[["PKG_CXXFLAGS"]] <- paste(buildEnv[["PKG_CXXFLAGS"]], "-std=c++11")
+  } else {
+    buildEnv[["USE_CXX1X"]] <- "yes"
+  }
 
   ctx <- new.env()
   ctx[["add_cpp"]] = function(code){
