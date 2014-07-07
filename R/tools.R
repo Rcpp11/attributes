@@ -27,10 +27,14 @@ asBuildPath <- function(path) {
     return (pkgCxxFlags)
 }
 
+is.mac <- function() {
+  Sys.info()["sysname"] == "Darwin"
+}
+
 is.snowleopard.R <- function() {
-  identical(R.version$os, "darwin10.8.0")
+  is.mac() && identical(R.version$os, "darwin10.8.0")
 }
 
 is.mavericks.system <- function() {
-  identical(system("uname -r", intern = TRUE), "13.2.0")
+  is.mac() && identical(system("uname -r", intern = TRUE), "13.2.0")
 }
