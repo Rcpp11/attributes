@@ -5,9 +5,7 @@ int cfind_prev_char(const char chr, const char* txt, int index);
 
 int is_roxygen(const char* x, int index) {
   int i = index;
-  char curr;
   while (1) {
-    curr = x[i];
     if (x[i] == '\0') return 0;
     if (x[i] == ' ' || x[i] == '\t') {
       ++i;
