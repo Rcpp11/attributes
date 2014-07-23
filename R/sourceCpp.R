@@ -149,7 +149,8 @@ extern "C" SEXP sourceCpp_%s( %s ){
 sourceCppHandlersEnv[["Rcpp::depends"]] <- function(attribute, context, ...){
   packages <- sapply( attribute$param, as.character )
   # emulate LinkingTo
-
+  sapply( packages, library, character.only = TRUE)
+  
   paths <- sapply( packages, function(.){
     system.file( "include", package = . )
   })
