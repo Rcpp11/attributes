@@ -22,7 +22,7 @@ get_attrs <- function(x) {
   if (!grepl("::", x, fixed=TRUE)) {
     x <- paste0("attributes::", x)
   }
-
+  
   ## wrap x in a function call, so we can handle arbitrary expressions
   call <- parse(text=paste0("dummy(", x, ")"))[[1]]
 
@@ -41,7 +41,7 @@ parse_attrs <- function(file, keep=NULL) {
   ## get the indices at which we saw attributes
   matches <- gregexpr(pattern, txt, perl=TRUE)
   ind <- c( matches[[1]] ) + 1L ## offset for newline matched
-  if (identical(ind, -1L)) {
+  if (identical(ind, 0L)) {
     return( list() )
   }
   n <- length(ind)
