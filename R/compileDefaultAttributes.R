@@ -22,7 +22,7 @@ compileDefaultAttributes <- function(pkgDir, verbose, RcppExports.R) {
   files <- list.files(srcDir, full.names=TRUE, pattern=".cc$|.cpp$")
 
   ## Parse the attributes
-  export_attrs <- lapply(files, parse_attrs, keep="Rcpp::export")
+  export_attrs <- Filter( function(x) length(x)>0L, lapply(files, parse_attrs, keep="Rcpp::export") )
 
   ## Get the definitions for each export
   exports <- unlist( lapply(export_attrs, parse_exports), recursive=FALSE )
